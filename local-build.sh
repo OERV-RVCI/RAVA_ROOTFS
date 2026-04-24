@@ -36,6 +36,7 @@ echo "步骤 2: 在容器内构建 rootfs..."
 docker run --rm --privileged \
     -v $(pwd)/output:/output \
     -v /dev:/dev \
+    -v /dev/pts:/dev/pts \
     -v /sys:/sys \
     -v /proc:/proc \
     rootfs-builder:latest \
