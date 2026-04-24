@@ -1,0 +1,90 @@
+name: Build openEuler RISC-V Rootfs
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+    inputs:
+      openeuler_release:
+        description: 'openEuler Release (e.g., 24.03)'
+        required: true
+        default: '24.03'
+      openeuler_version:
+        description: 'openEuler Version (e.g., SP3)'
+        required: true
+        default: 'SP3'
+
+env:
+  REGISTRY: hub.oepkgs.net
+  IMAGE_NAME: oerv-ci/rootfs-builder
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Docker Setup BuildX
+      uses: docker/setup-buildx-action@v3
+      with:
+        platforms: linux/riscv64
+        cleanup: true
+
+    - name: Generate Docker metadata
+      id: meta
+      uses: docker/metadata-action@v3
+      with:
+        images: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+            type=ref,event=branch
+            type=raw,value=openeuler-24.03-sp3
+
+    - name: Create a new builder instance
+      run: docker buildx create --use --name insecure-builder --buildkitd-flags '--allow-insecure-entitlement security.insecure'
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ vars.DOCKERHUB_OEPKGS_OERVCI_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_OEPKGS_OERVCI_TOKEN }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        file: ./Dockerfile
+        allow: security.insecure
+        no-cache: true
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        platforms: linux/riscv64
+
+    - name: Build rootfs
+      run: |
+        mkdir -p output
+        docker run --rm --privileged \
+          -v $(pwd)/output:/workspace \
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:openeuler-24.03-sp3 \
+          bash /workspace/build-rootfs.sh
+
+    - name: Display build artifacts
+      run: |
+        ls -lh output/
+        du -sh output/*
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: openeuler-rootfs
+        path: output/
+        retention-days: 30
