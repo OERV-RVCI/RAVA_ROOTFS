@@ -30,8 +30,6 @@ else
     BASE_LIST="${WORKSPACE}/base.list"
 fi
 
-REPO_URL="https://repo.openeuler.org/openEuler-${OPENEULER_RELEASE}/detached/YUM/${OPENEULER_VERSION}/standard_${ARCH}/"
-
 # 清理旧的构建产物
 rm -rf "${ROOTFS_DIR}"
 rm -f "${ROOTFS_IMG}"
@@ -46,19 +44,8 @@ echo "========================================="
 echo "版本: ${OPENEULER_RELEASE} ${OPENEULER_VERSION}"
 echo "架构: ${ARCH}"
 echo "构建目录: ${ROOTFS_DIR}"
+echo "使用容器默认软件源配置"
 echo "========================================="
-
-# 配置 openEuler 软件源
-echo "配置 openEuler 软件源..."
-mkdir -p "${ROOTFS_DIR}/etc/yum.repos.d"
-
-cat > "${ROOTFS_DIR}/etc/yum.repos.d/openeuler.repo" << EOF
-[openEuler]
-name=openEuler ${OPENEULER_RELEASE} ${OPENEULER_VERSION} - ${ARCH}
-baseurl=${REPO_URL}
-enabled=1
-gpgcheck=0
-EOF
 
 echo "从 base.list 读取包列表并安装..."
 if [ -f "${BASE_LIST}" ]; then
@@ -68,9 +55,6 @@ if [ -f "${BASE_LIST}" ]; then
 
     dnf install -y \
         --installroot="${ROOTFS_DIR}" \
-        --releasever="${OPENEULER_RELEASE}" \
-        --setopt=install_weak_deps=False \
-        --setopt=strict=0 \
         --nodocs \
         --allowerasing \
         ${PACKAGES}
