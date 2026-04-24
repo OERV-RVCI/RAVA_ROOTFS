@@ -27,7 +27,6 @@ RAVA_ROOTFS/
 ├── quickstart.sh                         - 快速开始指南 (1.9K)
 ├── README.md                             - 项目说明文档 (2.7K)
 ├── BUILD.md                              - 详细构建文档 (5.3K)
-├── KERNEL.md                             - 内核准备指南 (3.9K)
 ├── .gitignore                            - Git 忽略配置
 └── .github/workflows/
     └── build-rootfs.yml                  - GitHub Actions 流水线 (2.3K)
@@ -88,15 +87,6 @@ REPO_URL="https://repo.openeuler.org/openEuler-24.03/detached/YUM/SP2/standard_r
 
 **优势**: 使用官方镜像，无需配置私有仓库凭据
 
-### 5. KERNEL.md
-
-内核准备指南，包含：
-- 从 openEuler 仓库下载内核
-- 从已安装系统提取内核
-- 编译上游 Linux 内核
-- 创建 initrd
-- QEMU 启动示例
-
 ## 使用方法
 
 ### 本地快速构建
@@ -126,7 +116,7 @@ cd /home/snail/Work/github/wangliu-iscas/OERV-RVCI/RAVA_ROOTFS
 
 ## QEMU 测试示例
 
-**需要先准备内核和 initrd**（见 KERNEL.md）
+**需要先准备内核和 initrd**
 
 ```bash
 qemu-system-riscv64 \
@@ -207,11 +197,11 @@ rm -rf ${ROOTFS_DIR}/usr/share/doc/*
 
 ### 内核相关问题
 
-本 rootfs 不包含内核，请参考 KERNEL.md 准备内核和 initrd。
+本 rootfs 不包含内核，请自行准备内核和 initrd。
 
 ## 下一步
 
-1. 准备内核和 initrd（参考 KERNEL.md）
+1. 准备内核和 initrd
 2. 提交代码到 GitHub
 3. 推送到 main/master 分支触发构建
 4. 从 GitHub Actions 下载构建产物

@@ -22,7 +22,6 @@ RAVA_ROOTFS/
 │   └── build-rootfs.yml          # GitHub Actions 流水线
 ├── README.md                     - 本文档
 ├── BUILD.md                      - 详细构建文档
-├── KERNEL.md                     - 内核准备指南
 └── PROJECT.md                    - 项目总览
 ```
 
@@ -88,7 +87,7 @@ docker run --rm --privileged -v $(pwd)/output:/workspace rootfs-builder:latest
 
 ## 使用 rootfs
 
-**注意**: 本 rootfs 不包含内核，需要单独准备内核镜像和 initrd。详见 [KERNEL.md](KERNEL.md)。
+**注意**: 本 rootfs 不包含内核，需要单独准备内核镜像和 initrd。
 
 ### QEMU 启动
 
