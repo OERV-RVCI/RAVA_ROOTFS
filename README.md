@@ -13,11 +13,17 @@
 
 ```
 RAVA_ROOTFS/
-├── Dockerfile                    # Docker 镜像构建文件
-├── build-rootfs.sh               # rootfs 构建脚本
+├── Dockerfile                    # Docker 镜像构建文件（基于 openeuler:24.03-lts-sp2）
+├── build-rootfs.sh               # rootfs 构建脚本（支持 Docker 和本地两种方式）
+├── local-build.sh                # Docker 构建脚本
+├── native-build.sh               # 本地直接构建脚本
+├── base.list                     # 软件包列表（124 个包）
 ├── .github/workflows/
 │   └── build-rootfs.yml          # GitHub Actions 流水线
-└── README.md                     # 本文档
+├── README.md                     - 本文档
+├── BUILD.md                      - 详细构建文档
+├── KERNEL.md                     - 内核准备指南
+└── PROJECT.md                    - 项目总览
 ```
 
 ## 本地构建
@@ -66,10 +72,17 @@ docker run --rm --privileged -v $(pwd)/output:/workspace rootfs-builder:latest
 
 ## GitHub Actions 构建
 
+**注意**: 使用 `openeuler/openeuler:24.03-lts-sp2` 官方镜像，无需配置私有仓库。
+
 触发方式：
 
 1. **自动触发**: 推送到 main/master 分支
 2. **手动触发**: 在 Actions 页面手动触发，可指定版本参数
+
+构建流程：
+1. 从 Docker Hub 拉取 openeuler:24.03-lts-sp2 镜像
+2. 构建并运行 rootfs
+3. 上传构建产物（保留 30 天）
 
 构建产物会自动上传到 GitHub Actions artifacts，保留 30 天。
 

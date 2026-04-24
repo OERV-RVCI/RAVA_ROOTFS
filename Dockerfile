@@ -1,4 +1,4 @@
-FROM hub.oepkgs.net/oerv-ci/openeuler:24.03-lts-sp1
+FROM openeuler/openeuler:24.03-lts-sp2
 
 # 安装制作 rootfs 所需的工具
 RUN dnf makecache \
@@ -11,7 +11,6 @@ RUN dnf makecache \
         kpartx \
         rsync \
         xz \
-        systemd \
     && dnf clean all
 
 # 设置工作目录

@@ -16,10 +16,6 @@ on:
         required: true
         default: 'SP3'
 
-env:
-  REGISTRY: hub.oepkgs.net
-  IMAGE_NAME: oerv-ci/rootfs-builder
-
 jobs:
 
   build:
@@ -37,44 +33,15 @@ jobs:
         platforms: linux/riscv64
         cleanup: true
 
-    - name: Generate Docker metadata
-      id: meta
-      uses: docker/metadata-action@v3
-      with:
-        images: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-        tags: |
-            type=ref,event=branch
-            type=raw,value=openeuler-24.03-sp3
-
     - name: Create a new builder instance
       run: docker buildx create --use --name insecure-builder --buildkitd-flags '--allow-insecure-entitlement security.insecure'
-
-    - name: Login to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ vars.DOCKERHUB_OEPKGS_OERVCI_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_OEPKGS_OERVCI_TOKEN }}
-
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v6
-      with:
-        context: .
-        file: ./Dockerfile
-        allow: security.insecure
-        no-cache: true
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        platforms: linux/riscv64
 
     - name: Build rootfs
       run: |
         mkdir -p output
         docker run --rm --privileged \
           -v $(pwd)/output:/workspace \
-          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:openeuler-24.03-sp3 \
+          $(docker buildx build --load -q -t rootfs-builder:local .) \
           bash /workspace/build-rootfs.sh
 
     - name: Display build artifacts

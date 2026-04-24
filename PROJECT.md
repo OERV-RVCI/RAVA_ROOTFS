@@ -37,9 +37,11 @@ RAVA_ROOTFS/
 
 ### 1. Dockerfile
 
-- 基础镜像: `hub.oepkgs.net/oerv-ci/openeuler:24.03-lts-sp1`
-- 安装工具: dnf, qemu-img, e2fsprogs, systemd 等
+- 基础镜像: `openeuler/openeuler:24.03-lts-sp2` (官方镜像)
+- 安装工具: dnf, qemu-img, e2fsprogs 等
 - 复制构建脚本并设置执行权限
+
+**优势**: 使用官方镜像，稳定可靠，无需配置私有仓库
 
 ### 2. build-rootfs.sh
 
@@ -79,11 +81,12 @@ REPO_URL="https://repo.openeuler.org/openEuler-24.03/detached/YUM/SP3/standard_r
 - 手动触发（可指定版本参数）
 
 构建流程：
-1. 设置 QEMU 和 Docker BuildX
-2. 构建 RISC-V Docker 镜像
-3. 登录到 hub.oepkgs.net
-4. 运行 rootfs 构建
-5. 上传构建产物（保留 30 天）
+1. 从 Docker Hub 拉取 `openeuler/openeuler:24.03-lts-sp2`
+2. 设置 QEMU 和 Docker BuildX
+3. 构建并运行 rootfs
+4. 上传构建产物（保留 30 天）
+
+**优势**: 使用官方镜像，无需配置私有仓库凭据
 
 ### 5. KERNEL.md
 
@@ -224,9 +227,10 @@ rm -rf ${ROOTFS_DIR}/usr/share/doc/*
 ---
 
 **构建时间**: 2026-04-24
-**版本**: 3.0
+**版本**: 4.0
 **维护者**: OERV-CI Team
 **变更**:
-- 使用 base.list 替代 Minimal Install 包组
-- 改为单一 root 分区（/dev/vda）
-- 默认 root 密码改为 openEuler12#$
+- 使用 openeuler/openeuler:24.03-lts-sp2 官方镜像
+- 移除对 hub.oepkgs.net 私有仓库的依赖
+- 简化 GitHub Actions 流程
+- 添加本地直接构建方式
