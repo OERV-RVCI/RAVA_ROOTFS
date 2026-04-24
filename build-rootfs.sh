@@ -37,7 +37,7 @@ rm -rf "${ROOTFS_DIR}"
 rm -f "${ROOTFS_IMG}"
 rm -f "${ROOTFS_TARBALL}"
 
-# 创建 rootfs 目录
+# 创建 rootfs 根目录
 mkdir -p "${ROOTFS_DIR}"
 
 echo "========================================="
@@ -48,23 +48,7 @@ echo "架构: ${ARCH}"
 echo "构建目录: ${ROOTFS_DIR}"
 echo "========================================="
 
-# 创建基本目录结构
-mkdir -p "${ROOTFS_DIR}"/{dev,proc,sys,run,tmp,var,tmp,home,root,etc,boot,usr,lib,opt,mnt,media,srv,sbin,bin}
-mkdir -p "${ROOTFS_DIR}"/var/{lib,rpm,cache,log,run,spool,tmp,lock,opt}
-mkdir -p "${ROOTFS_DIR}"/usr/{lib,bin,sbin,local}
-
-# 创建设备文件
-mknod -m 600 "${ROOTFS_DIR}/dev/console" c 5 1
-mknod -m 666 "${ROOTFS_DIR}/dev/null" c 1 3
-mknod -m 666 "${ROOTFS_DIR}/dev/zero" c 1 5
-mknod -m 666 "${ROOTFS_DIR}/dev/random" c 1 8
-mknod -m 666 "${ROOTFS_DIR}/dev/urandom" c 1 9
-ln -sf /proc/self/fd "${ROOTFS_DIR}/dev/fd"
-ln -sf /proc/self/fd/0 "${ROOTFS_DIR}/dev/stdin"
-ln -sf /proc/self/fd/1 "${ROOTFS_DIR}/dev/stdout"
-ln -sf /proc/self/fd/2 "${ROOTFS_DIR}/dev/stderr"
-ln -sf /proc/kcore "${ROOTFS_DIR}/dev/core"
-
+# 配置 openEuler 软件源
 echo "配置 openEuler 软件源..."
 mkdir -p "${ROOTFS_DIR}/etc/yum.repos.d"
 
@@ -96,6 +80,20 @@ else
 fi
 
 echo "软件包安装完成"
+
+# 创建必要的设备文件（dnf 不会创建这些）
+echo "创建设备文件..."
+mkdir -p "${ROOTFS_DIR}/dev"
+mknod -m 600 "${ROOTFS_DIR}/dev/console" c 5 1
+mknod -m 666 "${ROOTFS_DIR}/dev/null" c 1 3
+mknod -m 666 "${ROOTFS_DIR}/dev/zero" c 1 5
+mknod -m 666 "${ROOTFS_DIR}/dev/random" c 1 8
+mknod -m 666 "${ROOTFS_DIR}/dev/urandom" c 1 9
+ln -sf /proc/self/fd "${ROOTFS_DIR}/dev/fd"
+ln -sf /proc/self/fd/0 "${ROOTFS_DIR}/dev/stdin"
+ln -sf /proc/self/fd/1 "${ROOTFS_DIR}/dev/stdout"
+ln -sf /proc/self/fd/2 "${ROOTFS_DIR}/dev/stderr"
+ln -sf /proc/kcore "${ROOTFS_DIR}/dev/core"
 
 # 配置基本系统
 echo "配置基本系统..."
