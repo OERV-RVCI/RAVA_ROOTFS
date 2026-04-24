@@ -133,22 +133,7 @@ export no_proxy=localhost,127.0.0.1
 PROXYEOF
 chmod +x "${ROOTFS_DIR}/etc/profile.d/proxy.sh"
 
-echo "代理配置完成（用户登录后自动加载）"
-
-# 下载 stream.c 文件（使用代理）
-echo "下载 stream.c 文件到 /root/..."
-https_proxy="http://10.200.2.1:8586"
-http_proxy="http://10.200.2.1:8586"
-all_proxy="socks5://10.200.2.1:8585"
-
-chroot "${ROOTFS_DIR}" /bin/bash -c "
-  export https_proxy='${https_proxy}'
-  export http_proxy='${http_proxy}'
-  export all_proxy='${all_proxy}'
-  wget -O /root/stream.c https://www.cs.virginia.edu/stream/FTP/Code/stream.c
-"
-
-echo "文件下载完成"
+echo "基本系统配置完成"
 
 # 清理 rpm 数据
 rm -rf "${ROOTFS_DIR}/var/cache/dnf"

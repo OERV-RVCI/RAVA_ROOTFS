@@ -62,7 +62,9 @@ ARCH="riscv64"
 - 密码: openEuler12#$
 - 分区: 单一 root 分区（/dev/vda）
 - 时间同步: 已启用 systemd-timesyncd
-- **代理配置**: 用户登录后自动加载（`/etc/profile.d/proxy.sh`）
+- **代理配置**:
+  - 构建时: 通过环境变量使用代理（GitHub Actions）
+  - 使用时: 用户登录后自动加载（`/etc/profile.d/proxy.sh`）
   - https_proxy: http://10.200.2.1:8586
   - http_proxy: http://10.200.2.1:8586
   - all_proxy: socks5://10.200.2.1:8585

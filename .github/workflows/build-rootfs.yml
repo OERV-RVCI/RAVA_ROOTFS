@@ -37,6 +37,9 @@ jobs:
         docker run --rm --privileged \
           -v $(pwd)/output:/output \
           -v /dev:/dev \
+          -e HTTPS_PROXY=http://10.200.2.1:8586 \
+          -e HTTP_PROXY=http://10.200.2.1:8586 \
+          -e ALL_PROXY=socks5://10.200.2.1:8585 \
           rootfs-builder \
           bash /workspace/build-rootfs.sh
 
