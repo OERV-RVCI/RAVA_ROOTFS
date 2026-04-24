@@ -34,7 +34,8 @@ docker build -t rootfs-builder:latest .
 echo ""
 echo "步骤 2: 在容器内构建 rootfs..."
 docker run --rm --privileged \
-    -v $(pwd)/output:/workspace \
+    -v $(pwd)/output:/output \
+    -v /dev:/dev \
     rootfs-builder:latest \
     bash /workspace/build-rootfs.sh
 
