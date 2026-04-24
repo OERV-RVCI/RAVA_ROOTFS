@@ -123,6 +123,18 @@ TIMESYNCEOF
 
 echo "基本系统配置完成"
 
+# 配置代理环境变量（用户登录后自动加载）
+echo "配置代理环境变量..."
+cat > "${ROOTFS_DIR}/etc/profile.d/proxy.sh" << 'PROXYEOF'
+export https_proxy=http://10.200.2.1:8586
+export http_proxy=http://10.200.2.1:8586
+export all_proxy=socks5://10.200.2.1:8585
+export no_proxy=localhost,127.0.0.1
+PROXYEOF
+chmod +x "${ROOTFS_DIR}/etc/profile.d/proxy.sh"
+
+echo "代理配置完成（用户登录后自动加载）"
+
 # 清理 rpm 数据
 rm -rf "${ROOTFS_DIR}/var/cache/dnf"
 rm -rf "${ROOTFS_DIR}/var/lib/dnf"
