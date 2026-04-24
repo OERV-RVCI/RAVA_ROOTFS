@@ -121,18 +121,42 @@ chroot "${ROOTFS_DIR}" systemctl enable sshd.service 2>/dev/null || true
 chroot "${ROOTFS_DIR}" systemctl enable NetworkManager.service 2>/dev/null || true
 chroot "${ROOTFS_DIR}" systemctl enable systemd-networkd.service 2>/dev/null || true
 chroot "${ROOTFS_DIR}" systemctl enable systemd-resolved.service 2>/dev/null || true
+chroot "${ROOTFS_DIR}" systemctl enable systemd-timesyncd.service 2>/dev/null || true
+
+# 配置时间同步
+cat > "${ROOTFS_DIR}/etc/systemd/timesyncd.conf" << 'TIMESYNCEOF'
+[Time]
+NTP=ntp.aliyun.com ntp.tencent.com
+FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org
+TIMESYNCEOF
 
 # 创建网络配置
 mkdir -p "${ROOTFS_DIR}/etc/systemd/network"
-cat > "${ROOTFS_DIR}/etc/systemd/network/20-wired.network" << 'EOF'
+cat > "${ROOTFS_DIR}/etc/systemd/network/20-wired.network" << 'NETWORKEOF'
 [Match]
 Name=en*
 
 [Network]
 DHCP=yes
-EOF
+NETWORKEOF
 
 echo "基本系统配置完成"
+
+# 配置代理环境变量
+echo "配置代理环境变量..."
+cat >> "${ROOTFS_DIR}/etc/profile.d/proxy.sh" << 'PROXYEOF'
+export https_proxy=http://10.200.2.1:8586
+export http_proxy=http://10.200.2.1:8586
+export all_proxy=socks5://10.200.2.1:8585
+export no_proxy=localhost,127.0.0.1
+PROXYEOF
+chmod +x "${ROOTFS_DIR}/etc/profile.d/proxy.sh"
+
+# 下载 stream.c 文件
+echo "下载 stream.c 文件到 /root/..."
+chroot "${ROOTFS_DIR}" /bin/bash -c "source /etc/profile.d/proxy.sh && wget -O /root/stream.c https://www.cs.virginia.edu/stream/FTP/Code/stream.c"
+
+echo "代理配置和文件下载完成"
 
 # 清理 rpm 数据
 rm -rf "${ROOTFS_DIR}/var/cache/dnf"

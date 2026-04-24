@@ -137,6 +137,12 @@ dd if=openeuler-rootfs.img of=/dev/sdX bs=1M status=progress
 - **SSH**: 已启用，允许 root 登录
 - **网络**: DHCP 自动获取
 - **分区**: 单一 root 分区（/dev/vda）
+- **时间同步**: 已启用 systemd-timesyncd（国内 NTP 服务器）
+- **代理配置**: 已设置默认代理（可在 `/etc/profile.d/proxy.sh` 修改）
+  - https_proxy: `http://10.200.2.1:8586`
+  - http_proxy: `http://10.200.2.1:8586`
+  - all_proxy: `socks5://10.200.2.1:8585`
+- **预下载文件**: `/root/stream.c`（stream 工具源码）
 
 ## 自定义
 
