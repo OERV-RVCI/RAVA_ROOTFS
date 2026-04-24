@@ -31,8 +31,8 @@ jobs:
       run: |
         mkdir -p output
         docker run --rm --privileged \
-          -v $(pwd)/output:/workspace \
-          $(docker buildx build --load -q -t rootfs-builder:local .) \
+          -v $(pwd)/output:/output \
+          rootfs-builder:local \
           bash /workspace/build-rootfs.sh
 
     - name: Display build artifacts

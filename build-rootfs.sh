@@ -19,9 +19,15 @@ echo "  使用容器默认软件源配置"
 if [ -f "/.dockerenv" ]; then
     echo "检测到在容器内运行"
     # 在容器内使用 installroot 方式（更干净）
-    ROOTFS_DIR="/workspace/rootfs"
-    ROOTFS_IMG="/workspace/openeuler-rootfs.img.zst"
-    ROOTFS_TARBALL="/workspace/openeuler-rootfs.tar.gz"
+    # 优先使用 /output 目录（用于 GitHub Actions）
+    if [ -d "/output" ]; then
+        WORKSPACE="/output"
+    else
+        WORKSPACE="/workspace"
+    fi
+    ROOTFS_DIR="${WORKSPACE}/rootfs"
+    ROOTFS_IMG="${WORKSPACE}/openeuler-rootfs.img.zst"
+    ROOTFS_TARBALL="${WORKSPACE}/openeuler-rootfs.tar.gz"
     BASE_LIST="/workspace/base.list"
 else
     echo "在宿主机运行"
