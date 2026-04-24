@@ -64,6 +64,13 @@ if [ -f "${BASE_LIST}" ]; then
     echo "安装以下软件包:"
     echo "${PACKAGES}"
 
+    # 临时挂载虚拟文件系统
+    echo "挂载虚拟文件系统..."
+    mount -t proc /proc "${ROOTFS_DIR}/proc"
+    mount -t sysfs /sys "${ROOTFS_DIR}/sys"
+    mount --bind /dev "${ROOTFS_DIR}/dev"
+    mount -t devpts devpts "${ROOTFS_DIR}/dev/pts"
+
     dnf install -y \
         --installroot="${ROOTFS_DIR}" \
         --forcearch="${ARCH}" \
@@ -143,6 +150,13 @@ rm -rf "${ROOTFS_DIR}/var/lib/dnf"
 rm -rf "${ROOTFS_DIR}/var/log/yum.log"
 rm -rf "${ROOTFS_DIR}/var/log/dnf.rpm.log"
 
+# 卸载虚拟文件系统
+echo "卸载虚拟文件系统..."
+umount "${ROOTFS_DIR}/dev/pts" || true
+umount "${ROOTFS_DIR}/dev" || true
+umount "${ROOTFS_DIR}/sys" || true
+umount "${ROOTFS_DIR}/proc" || true
+
 # 创建 ext4 镜像
 echo "创建 ext4 文件系统镜像..."
 ROOTFS_SIZE=$(du -sm "${ROOTFS_DIR}" | cut -f1)
@@ -160,7 +174,7 @@ MOUNT_DIR="/tmp/rootfs_mount"
 mkdir -p "${MOUNT_DIR}"
 mount -o loop "${TEMP_IMG}" "${MOUNT_DIR}"
 
-cp -a "${ROOTFS_DIR}"/* "${MOUNT_DIR}/"
+cp -a "${ROOTFS_DIR}/" "${MOUNT_DIR}/"
 
 # 设置权限
 chmod 1777 "${MOUNT_DIR}/tmp"

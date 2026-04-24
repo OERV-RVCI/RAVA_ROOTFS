@@ -36,6 +36,8 @@ jobs:
         docker run --rm --privileged \
           -v $(pwd)/output:/output \
           -v /dev:/dev \
+          -v /sys:/sys \
+          -v /proc:/proc \
           rootfs-builder \
           bash /workspace/build-rootfs.sh
 
