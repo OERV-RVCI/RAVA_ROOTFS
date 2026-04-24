@@ -46,6 +46,10 @@ rm -f "${ROOTFS_TARBALL}"
 # 创建 rootfs 根目录
 mkdir -p "${ROOTFS_DIR}"
 
+# 创建必要的虚拟文件系统目录
+mkdir -p "${ROOTFS_DIR}"/{dev,sys,proc}
+mkdir -p "${ROOTFS_DIR}/dev/pts"
+
 echo "========================================="
 echo "openEuler Rootfs 构建"
 echo "========================================="
@@ -76,13 +80,16 @@ echo "软件包安装完成"
 # 配置基本系统
 echo "配置基本系统..."
 
-# 创建 fstab（单一 root 分区）
+# 创建 fstab（单一 root 分区 + 虚拟文件系统）
 cat > "${ROOTFS_DIR}/etc/fstab" << 'EOF'
 # /etc/fstab
 # Created by rootfs build script
 # Single root partition
 
 /dev/vda  /      ext4    defaults    0 1
+devpts   /dev/pts devpts   defaults    0 0
+proc     /proc   proc     defaults    0 0
+sys      /sys    sysfs    defaults    0 0
 EOF
 
 # 配置 hostname
