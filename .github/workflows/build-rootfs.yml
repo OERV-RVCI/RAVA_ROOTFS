@@ -31,7 +31,7 @@ jobs:
       run: |
         docker buildx build --load -t rootfs-builder .
 
-- name: Build rootfs
+    - name: Build rootfs
       run: |
         mkdir -p output
         docker run --rm --privileged \
