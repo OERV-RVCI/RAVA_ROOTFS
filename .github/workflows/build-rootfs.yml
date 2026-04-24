@@ -41,6 +41,8 @@ jobs:
         mkdir -p output
         docker run --rm --privileged \
           -v $(pwd)/output:/workspace \
+          -e OPENEULER_RELEASE="${{ inputs.openeuler_release }}" \
+          -e OPENEULER_VERSION="${{ inputs.openeuler_version }}" \
           $(docker buildx build --load -q -t rootfs-builder:local .) \
           bash /workspace/build-rootfs.sh
 

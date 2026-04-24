@@ -9,9 +9,14 @@
 set -e
 
 # 配置变量
-OPENEULER_RELEASE="24.03"
-OPENEULER_VERSION="SP2"
+# 支持通过环境变量覆盖
+OPENEULER_RELEASE="${OPENEULER_RELEASE:-24.03}"
+OPENEULER_VERSION="${OPENEULER_VERSION:-SP2}"
 ARCH="riscv64"
+
+echo "构建配置:"
+echo "  版本: ${OPENEULER_RELEASE} ${OPENEULER_VERSION}"
+echo "  架构: ${ARCH}"
 
 # 检测运行环境
 if [ -f "/.dockerenv" ]; then
