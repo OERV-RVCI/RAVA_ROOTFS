@@ -62,8 +62,6 @@ ARCH="riscv64"
 - 密码: openEuler12#$
 - 分区: 单一 root 分区（/dev/vda）
 - 时间同步: 已启用 systemd-timesyncd
-- 代理配置: 已设置默认代理（`/etc/profile.d/proxy.sh`）
-- 预下载文件: `/root/stream.c`
 
 ### 3. local-build.sh
 
