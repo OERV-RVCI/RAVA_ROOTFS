@@ -12,6 +12,7 @@ RUN dnf makecache \
         rsync \
         xz \
         zstd \
+        wget \
     && dnf clean all
 
 # 复制包列表和构建脚本
