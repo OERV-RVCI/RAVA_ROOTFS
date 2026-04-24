@@ -7,25 +7,30 @@
 ## 功能特性
 
 ✅ 自动化构建流程（Docker + GitHub Actions）
-✅ 支持本地测试和 CI/CD 集成
-✅ 安装 "Minimal Install" 包组
-✅ 生成 ext4 文件系统镜像
+✅ 根据 base.list 安装指定的软件包列表
+✅ 生成 ext4 文件系统镜像（单一 root 分区）
 ✅ 生成 tar.xz 压缩包
 ✅ 完整的文档和示例
+
+**注意**:
+- 本 rootfs 不包含内核软件包，需要单独准备内核镜像和 initrd
+- 默认使用单一 root 分区（/dev/vda）
+- 默认 root 密码为 openEuler12#$
 
 ## 项目结构
 
 ```
 RAVA_ROOTFS/
 ├── Dockerfile                            # Docker 镜像构建文件 (552 bytes)
-├── build-rootfs.sh                       # rootfs 构建核心脚本 (5.4K)
-├── local-build.sh                        # 本地测试构建脚本 (1.3K)
-├── quickstart.sh                         # 快速开始指南 (1.9K)
-├── README.md                             # 项目说明文档 (2.7K)
-├── BUILD.md                              # 详细构建文档 (5.3K)
-├── .gitignore                            # Git 忽略配置
+├── build-rootfs.sh                       - rootfs 构建核心脚本 (5.4K)
+├── local-build.sh                        - 本地测试构建脚本 (1.3K)
+├── quickstart.sh                         - 快速开始指南 (1.9K)
+├── README.md                             - 项目说明文档 (2.7K)
+├── BUILD.md                              - 详细构建文档 (5.3K)
+├── KERNEL.md                             - 内核准备指南 (3.9K)
+├── .gitignore                            - Git 忽略配置
 └── .github/workflows/
-    └── build-rootfs.yml                  # GitHub Actions 流水线 (2.3K)
+    └── build-rootfs.yml                  - GitHub Actions 流水线 (2.3K)
 ```
 
 ## 核心文件说明
@@ -41,9 +46,9 @@ RAVA_ROOTFS/
 主要功能：
 - 创建 rootfs 目录结构
 - 配置 openEuler 软件源
-- 安装 Minimal Install 包组（包含内核、systemd、NetworkManager、openssh 等）
+- 从 base.list 读取并安装软件包
 - 配置系统（fstab、hostname、网络、SSH）
-- 创建 ext4 文件系统镜像
+- 创建 ext4 文件系统镜像（单一 root 分区）
 - 打包 tar.xz
 
 关键配置：
@@ -56,7 +61,8 @@ REPO_URL="https://repo.openeuler.org/openEuler-24.03/detached/YUM/SP3/standard_r
 
 默认登录：
 - 用户: root
-- 密码: openeuler
+- 密码: openEuler12#$
+- 分区: 单一 root 分区（/dev/vda）
 
 ### 3. local-build.sh
 
@@ -78,6 +84,15 @@ REPO_URL="https://repo.openeuler.org/openEuler-24.03/detached/YUM/SP3/standard_r
 3. 登录到 hub.oepkgs.net
 4. 运行 rootfs 构建
 5. 上传构建产物（保留 30 天）
+
+### 5. KERNEL.md
+
+内核准备指南，包含：
+- 从 openEuler 仓库下载内核
+- 从已安装系统提取内核
+- 编译上游 Linux 内核
+- 创建 initrd
+- QEMU 启动示例
 
 ## 使用方法
 
@@ -108,6 +123,8 @@ cd /home/snail/Work/github/wangliu-iscas/OERV-RVCI/RAVA_ROOTFS
 
 ## QEMU 测试示例
 
+**需要先准备内核和 initrd**（见 KERNEL.md）
+
 ```bash
 qemu-system-riscv64 \
   -M virt -m 2G -smp 4 \
@@ -129,11 +146,15 @@ OPENEULER_RELEASE="24.03"    # 修改为其他版本
 OPENEULER_VERSION="SP3"      # 修改为其他更新
 ```
 
-### 添加软件包
+### 修改软件包列表
 
-在 `build-rootfs.sh` 的 `dnf install` 中添加:
-```bash
-vim git docker
+编辑 `base.list` 文件，添加或删除需要的包：
+
+```
+NetworkManager
+openssh-server
+vim-enhanced
+git
 ```
 
 ### 修改默认密码
@@ -141,6 +162,16 @@ vim git docker
 在 `build-rootfs.sh` 中修改:
 ```bash
 echo "root:your_new_password" | chroot "${ROOTFS_DIR}" chpasswd
+```
+
+### 修改分区配置
+
+在 `build-rootfs.sh` 的 fstab 中修改：
+```bash
+# 默认单一 root 分区
+/dev/vda  /      ext4    defaults    0 1
+
+# 如需多个分区，自行调整
 ```
 
 ## 环境要求
@@ -171,21 +202,31 @@ rm -rf ${ROOTFS_DIR}/usr/share/locale/*
 rm -rf ${ROOTFS_DIR}/usr/share/doc/*
 ```
 
+### 内核相关问题
+
+本 rootfs 不包含内核，请参考 KERNEL.md 准备内核和 initrd。
+
 ## 下一步
 
-1. 提交代码到 GitHub
-2. 推送到 main/master 分支触发构建
-3. 从 GitHub Actions 下载构建产物
-4. 在 QEMU 或真实硬件上测试
+1. 准备内核和 initrd（参考 KERNEL.md）
+2. 提交代码到 GitHub
+3. 推送到 main/master 分支触发构建
+4. 从 GitHub Actions 下载构建产物
+5. 在 QEMU 或真实硬件上测试
 
 ## 相关资源
 
 - [openEuler 官方网站](https://www.openeuler.org/)
 - [openEuler RISC-V](https://www.openeuler.org/zh/architecture/riscv/)
 - [QEMU 文档](https://www.qemu.org/docs/master/system/target-riscv.html)
+- [Linux 内核](https://www.kernel.org/)
 
 ---
 
 **构建时间**: 2026-04-24
-**版本**: 1.0
+**版本**: 3.0
 **维护者**: OERV-CI Team
+**变更**:
+- 使用 base.list 替代 Minimal Install 包组
+- 改为单一 root 分区（/dev/vda）
+- 默认 root 密码改为 openEuler12#$

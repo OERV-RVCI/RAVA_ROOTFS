@@ -5,8 +5,8 @@
 ## 功能
 
 - 构建 openEuler 24.03 SP3 RISC-V rootfs
-- 安装 "Minimal Install" 包组
-- 生成 ext4 文件系统镜像
+- 根据 base.list 安装指定的软件包
+- 生成 ext4 文件系统镜像（单一 root 分区）
 - 打包 tar.xz 压缩包
 
 ## 目录结构
@@ -67,6 +67,8 @@ docker run --rm --privileged -v $(pwd)/output:/workspace rootfs-builder:latest b
 
 ## 使用 rootfs
 
+**注意**: 本 rootfs 不包含内核，需要单独准备内核镜像和 initrd。详见 [KERNEL.md](KERNEL.md)。
+
 ### QEMU 启动
 
 ```bash
@@ -83,6 +85,18 @@ qemu-system-riscv64 \
   -nographic
 ```
 
+**内核准备**:
+
+从 openEuler 下载 RISC-V 内核：
+```bash
+# 内核镜像
+wget https://repo.openeuler.org/openEuler-24.03/detached/YUM/SP3/standard_riscv64/Packages/kernel-image-*.rpm
+rpm2cpio kernel-image-*.rpm | cpio -idmv ./boot/Image
+
+# initrd
+wget https://repo.openeuler.org/openEuler-24.03/detached/YUM/SP3/standard_riscv64/Packages/kernel-modules-*.rpm
+```
+
 ### 真机启动
 
 将 ext4 镜像写入存储设备：
@@ -94,13 +108,28 @@ dd if=openeuler-24.03-SP3-riscv64-rootfs.ext4 of=/dev/sdX bs=1M status=progress
 ## 默认配置
 
 - **用户**: root
-- **密码**: openeuler（登录后请修改）
+- **密码**: openEuler12#$（登录后请修改）
 - **SSH**: 已启用，允许 root 登录
 - **网络**: DHCP 自动获取
+- **分区**: 单一 root 分区（/dev/vda）
 
 ## 自定义
 
-修改 `build-rootfs.sh` 中的变量：
+### 修改软件包列表
+
+编辑 `base.list` 文件，添加或删除需要的软件包：
+
+```
+# base.list 示例
+NetworkManager
+openssh-server
+openssh-clients
+vim-enhanced
+```
+
+### 修改版本
+
+编辑 `build-rootfs.sh`：
 
 ```bash
 OPENEULER_RELEASE="24.03"     # 发行版本
@@ -108,9 +137,13 @@ OPENEULER_VERSION="SP3"       # 更新版本
 ARCH="riscv64"                # 架构
 ```
 
-修改软件包列表：
+### 修改默认密码
 
-在 `dnf install` 命令中添加/删除需要的包。
+在 `build-rootfs.sh` 中修改：
+
+```bash
+echo "root:your_new_password" | chroot "${ROOTFS_DIR}" chpasswd
+```
 
 ## 注意事项
 

@@ -60,60 +60,37 @@ enabled=1
 gpgcheck=0
 EOF
 
-# 安装基本 RPM 包
-echo "安装基本软件包..."
+# 读取 base.list 包列表并安装
+echo "从 base.list 读取包列表并安装..."
+if [ -f "/workspace/base.list" ]; then
+    PACKAGES=$(cat /workspace/base.list | tr '\n' ' ')
+    echo "安装以下软件包:"
+    echo "${PACKAGES}"
 
-# 安装内核和基本系统包
-dnf install -y \
-    --installroot="${ROOTFS_DIR}" \
-    --releasever="${OPENEULER_RELEASE}" \
-    --setopt=install_weak_deps=False \
-    --setopt=strict=0 \
-    --nodocs \
-    --allowerasing \
-    kernel \
-    kernel-modules \
-    bash \
-    coreutils \
-    util-linux \
-    e2fsprogs \
-    glibc \
-    glibc-minimal-langpack \
-    systemd \
-    systemd-libs \
-    systemd-pam \
-    NetworkManager \
-    dhclient \
-    openssh-server \
-    openssh-clients \
-    iproute \
-    iputils \
-    net-tools \
-    vim-minimal \
-    less \
-    tar \
-    gzip \
-    xz \
-    which \
-    sudo \
-    shadow-utils \
-    rootfiles \
-    rsyslog \
-    crontabs \
-    tzdata
+    dnf install -y \
+        --installroot="${ROOTFS_DIR}" \
+        --releasever="${OPENEULER_RELEASE}" \
+        --setopt=install_weak_deps=False \
+        --setopt=strict=0 \
+        --nodocs \
+        --allowerasing \
+        ${PACKAGES}
+else
+    echo "警告: base.list 文件不存在，跳过软件包安装"
+fi
 
 echo "软件包安装完成"
 
 # 配置基本系统
 echo "配置基本系统..."
 
-# 创建 fstab
+# 创建 fstab（单一 root 分区）
 cat > "${ROOTFS_DIR}/etc/fstab" << 'EOF'
 # /etc/fstab
 # Created by rootfs build script
+# Single root partition
 
-/dev/mmcblk0p2 /      ext4    defaults    0 1
-/dev/mmcblk0p1 /boot  vfat    defaults    0 2
+/dev/vda  /      ext4    defaults    0 1
 EOF
 
 # 配置 hostname
@@ -136,8 +113,8 @@ mkdir -p "${ROOTFS_DIR}/etc/ssh"
 echo "PasswordAuthentication yes" >> "${ROOTFS_DIR}/etc/ssh/sshd_config"
 echo "PermitRootLogin yes" >> "${ROOTFS_DIR}/etc/ssh/sshd_config"
 
-# 配置 root 密码（默认为 openeuler，请登录后修改）
-echo "root:openeuler" | chroot "${ROOTFS_DIR}" chpasswd
+# 配置 root 密码（默认为 openEuler12#$，请登录后修改）
+echo "root:openEuler12#$" | chroot "${ROOTFS_DIR}" chpasswd
 
 # 配置 systemd
 ln -sf /usr/lib/systemd/systemd "${ROOTFS_DIR}/init"

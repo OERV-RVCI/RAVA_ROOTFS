@@ -68,13 +68,36 @@
 
 ## 软件包说明
 
-### 核心包组
+### base.list 包列表
 
-- **kernel**: Linux 内核
-- **systemd**: 系统和服务管理器
-- **NetworkManager**: 网络管理
-- **openssh-server**: SSH 服务器
-- **bash**: Shell 环境
+通过 `base.list` 文件指定需要安装的软件包，包含：
+
+- **系统工具**: coreutils, bash, vim-enhanced, nano 等
+- **网络管理**: NetworkManager, NetworkManager-wifi, iproute 等
+- **系统服务**: systemd, rsyslog, chrony, NetworkManager 等
+- **安全工具**: openssh-server, openssh-clients, sudo, firewalld 等
+- **开发工具**: git, vim-enhanced, strace, bc 等
+- **存储管理**: lvm2, mdadm, xfsprogs, e2fsprogs 等
+- **其他实用工具**: wget, curl, rsync, tar, zip 等
+
+**不包含**: Linux 内核和内核模块
+
+### 包列表文件
+
+`base.list` 位于项目根目录，每行一个包名：
+
+```
+NetworkManager
+openssh-server
+vim-enhanced
+...
+```
+
+### 内核说明
+
+本 rootfs **不包含内核软件包**，需要单独准备：
+- `Image` 或 `vmlinux` - 内核镜像
+- `initrd` 或 `initramfs` - 初始 RAM 磁盘
 
 ### 可选添加
 
