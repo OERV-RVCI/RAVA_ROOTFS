@@ -10,9 +10,19 @@ set -e
 OPENEULER_RELEASE="24.03"
 OPENEULER_VERSION="SP3"
 ARCH="riscv64"
-ROOTFS_DIR="/workspace/rootfs"
-ROOTFS_IMG="/workspace/openeuler-${OPENEULER_RELEASE}-${OPENEULER_VERSION}-${ARCH}-rootfs.ext4"
-ROOTFS_TARBALL="/workspace/openeuler-${OPENEULER_RELEASE}-${OPENEULER_VERSION}-${ARCH}-rootfs.tar.xz"
+
+# 检测是否在 Docker 中
+if [ -f "/.dockerenv" ]; then
+    WORKSPACE="/workspace"
+    BASE_LIST="/workspace/base.list"
+else
+    WORKSPACE="$(pwd)"
+    BASE_LIST="$(pwd)/base.list"
+fi
+
+ROOTFS_DIR="${WORKSPACE}/rootfs"
+ROOTFS_IMG="${WORKSPACE}/openeuler-${OPENEULER_RELEASE}-${OPENEULER_VERSION}-${ARCH}-rootfs.ext4"
+ROOTFS_TARBALL="${WORKSPACE}/openeuler-${OPENEULER_RELEASE}-${OPENEULER_VERSION}-${ARCH}-rootfs.tar.xz"
 REPO_URL="https://repo.openeuler.org/openEuler-${OPENEULER_RELEASE}/detached/YUM/${OPENEULER_VERSION}/standard_${ARCH}/"
 
 # 清理旧的构建产物
@@ -62,8 +72,8 @@ EOF
 
 # 读取 base.list 包列表并安装
 echo "从 base.list 读取包列表并安装..."
-if [ -f "/workspace/base.list" ]; then
-    PACKAGES=$(cat /workspace/base.list | tr '\n' ' ')
+if [ -f "${BASE_LIST}" ]; then
+    PACKAGES=$(cat "${BASE_LIST}" | tr '\n' ' ')
     echo "安装以下软件包:"
     echo "${PACKAGES}"
 
@@ -76,7 +86,8 @@ if [ -f "/workspace/base.list" ]; then
         --allowerasing \
         ${PACKAGES}
 else
-    echo "警告: base.list 文件不存在，跳过软件包安装"
+    echo "错误: base.list 文件不存在 (${BASE_LIST})"
+    exit 1
 fi
 
 echo "软件包安装完成"

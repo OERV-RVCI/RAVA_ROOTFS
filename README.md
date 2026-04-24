@@ -22,31 +22,39 @@ RAVA_ROOTFS/
 
 ## 本地构建
 
-### 方法 1: 使用本地测试脚本（推荐）
+### 方式 1: 使用 Docker（推荐）
 
 ```bash
 chmod +x local-build.sh
 ./local-build.sh
 ```
 
-这个脚本会自动完成以下步骤：
-1. 构建 Docker 镜像
-2. 运行 rootfs 构建脚本
-3. 生成输出文件
+**优点**:
+- 隔离环境，不污染宿主机
+- 保证构建一致性
+- 可在任何有 Docker 的机器上构建
 
-### 方法 2: 手动构建
+### 方式 2: 直接运行（需要 root 权限）
 
-#### 1. 构建 Docker 镜像
+```bash
+chmod +x native-build.sh
+sudo ./native-build.sh
+```
+
+**优点**:
+- 不需要 Docker
+- 更快（无 Docker 开销）
+
+**缺点**:
+- 需要 root 权限
+- 可能影响宿主机系统
+
+### 方式 3: 手动构建 Docker
 
 ```bash
 docker build -t rootfs-builder:latest .
-```
-
-#### 2. 运行构建脚本
-
-```bash
 mkdir -p output
-docker run --rm --privileged -v $(pwd)/output:/workspace rootfs-builder:latest bash /workspace/build-rootfs.sh
+docker run --rm --privileged -v $(pwd)/output:/workspace rootfs-builder:latest
 ```
 
 ### 3. 构建产物
