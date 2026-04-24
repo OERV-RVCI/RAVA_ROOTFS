@@ -143,7 +143,10 @@ rm -rf "${ROOTFS_DIR}/var/log/dnf.rpm.log"
 # 创建 ext4 镜像
 echo "创建 ext4 文件系统镜像..."
 ROOTFS_SIZE=$(du -sm "${ROOTFS_DIR}" | cut -f1)
-IMG_SIZE=$((ROOTFS_SIZE + 500))
+IMG_SIZE=$((ROOTFS_SIZE + 2048))  # 预留 2GB 空间
+
+echo "rootfs 实际大小: ${ROOTFS_SIZE}MB"
+echo "镜像总大小: ${IMG_SIZE}MB (预留 2GB)"
 
 dd if=/dev/zero of="${ROOTFS_IMG}" bs=1M count="${IMG_SIZE}"
 mkfs.ext4 -F "${ROOTFS_IMG}"
