@@ -2,7 +2,7 @@
 
 ## 项目概览
 
-本项目为 `/home/snail/Work/github/wangliu-iscas/OERV-RVCI/RAVA_ROOTFS` 仓库，提供完整的 openEuler 24.03 SP3 RISC-V 架构 rootfs 构建流水线。
+本项目为 `/home/snail/Work/github/wangliu-iscas/OERV-RVCI/RAVA_ROOTFS` 仓库，提供完整的 openEuler 24.03 SP2 RISC-V 架构 rootfs 构建流水线。
 
 ## 功能特性
 
@@ -56,9 +56,9 @@ RAVA_ROOTFS/
 关键配置：
 ```bash
 OPENEULER_RELEASE="24.03"
-OPENEULER_VERSION="SP3"
+OPENEULER_VERSION="SP2"
 ARCH="riscv64"
-REPO_URL="https://repo.openeuler.org/openEuler-24.03/detached/YUM/SP3/standard_riscv64/"
+REPO_URL="https://repo.openeuler.org/openEuler-24.03/detached/YUM/SP2/standard_riscv64/"
 ```
 
 默认登录：
@@ -121,8 +121,8 @@ cd /home/snail/Work/github/wangliu-iscas/OERV-RVCI/RAVA_ROOTFS
 
 位置: `output/` 目录
 
-- `openeuler-24.03-SP3-riscv64-rootfs.ext4` - ext4 文件系统镜像
-- `openeuler-24.03-SP3-riscv64-rootfs.tar.xz` - rootfs 压缩包
+- `openeuler-24.03-SP2-riscv64-rootfs.ext4` - ext4 文件系统镜像
+- `openeuler-24.03-SP2-riscv64-rootfs.tar.xz` - rootfs 压缩包
 
 ## QEMU 测试示例
 
@@ -134,7 +134,7 @@ qemu-system-riscv64 \
   -kernel /path/to/Image \
   -initrd /path/to/initrd \
   -device virtio-blk-device,drive=rootfs \
-  -drive if=none,file=output/openeuler-24.03-SP3-riscv64-rootfs.ext4,id=rootfs \
+  -drive if=none,file=output/openeuler-24.03-SP2-riscv64-rootfs.ext4,id=rootfs \
   -append "root=/dev/vda ro console=ttyS0" \
   -nographic
 ```
@@ -146,7 +146,7 @@ qemu-system-riscv64 \
 编辑 `build-rootfs.sh`:
 ```bash
 OPENEULER_RELEASE="24.03"    # 修改为其他版本
-OPENEULER_VERSION="SP3"      # 修改为其他更新
+OPENEULER_VERSION="SP2"      # 修改为其他更新
 ```
 
 ### 修改软件包列表
@@ -190,7 +190,7 @@ echo "root:your_new_password" | chroot "${ROOTFS_DIR}" chpasswd
 
 替换为国内镜像源:
 ```bash
-REPO_URL="https://mirrors.huaweicloud.com/openeuler/openEuler-24.03/detached/YUM/SP3/standard_riscv64/"
+REPO_URL="https://mirrors.huaweicloud.com/openeuler/openEuler-24.03/detached/YUM/SP2/standard_riscv64/"
 ```
 
 ### Docker 权限问题

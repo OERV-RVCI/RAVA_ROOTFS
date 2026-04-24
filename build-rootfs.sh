@@ -10,7 +10,7 @@ set -e
 
 # 配置变量
 OPENEULER_RELEASE="24.03"
-OPENEULER_VERSION="SP3"
+OPENEULER_VERSION="SP2"
 ARCH="riscv64"
 
 # 检测运行环境

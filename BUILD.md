@@ -117,7 +117,7 @@ docker           # 容器支持
 **解决**:
 ```bash
 # 替换为其他镜像源
-REPO_URL="https://mirrors.huaweicloud.com/openeuler/openEuler-24.03/detached/YUM/SP3/standard_riscv64/"
+REPO_URL="https://mirrors.huaweicloud.com/openeuler/openEuler-24.03/detached/YUM/SP2/standard_riscv64/"
 ```
 
 ### 2. ext4 镜像无法挂载
@@ -127,7 +127,7 @@ REPO_URL="https://mirrors.huaweicloud.com/openeuler/openEuler-24.03/detached/YUM
 **解决**:
 ```bash
 # 检查镜像
-fsck.ext4 -f openeuler-24.03-SP3-riscv64-rootfs.ext4
+fsck.ext4 -f openeuler-24.03-SP2-riscv64-rootfs.ext4
 
 # 重新创建
 dd if=/dev/zero of=image.ext4 bs=1M count=2048
@@ -138,7 +138,7 @@ mkfs.ext4 -F image.ext4
 
 **原因**: 内核与 rootfs 不匹配
 
-**解决**: 确保内核版本与 openEuler 24.03 SP3 兼容
+**解决**: 确保内核版本与 openEuler 24.03 SP2 兼容
 
 ## 性能优化
 

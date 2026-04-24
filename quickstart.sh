@@ -25,8 +25,8 @@ $ sudo ./native-build.sh
 
 📦 构建产物
 ─────────────────────────────────────────────────────────────────────
-output/openeuler-24.03-SP3-riscv64-rootfs.ext4  (ext4 镜像)
-output/openeuler-24.03-SP3-riscv64-rootfs.tar.xz (压缩包)
+output/openeuler-24.03-SP2-riscv64-rootfs.ext4  (ext4 镜像)
+output/openeuler-24.03-SP2-riscv64-rootfs.tar.xz (压缩包)
 
 🐏 QEMU 测试
 ─────────────────────────────────────────────────────────────────────
@@ -44,7 +44,7 @@ $ qemu-system-riscv64 \
     -kernel <kernel> \
     -initrd <initrd> \
     -device virtio-blk-device,drive=rootfs \
-    -drive if=none,file=output/openeuler-24.03-SP3-riscv64-rootfs.ext4,id=rootfs \
+    -drive if=none,file=output/openeuler-24.03-SP2-riscv64-rootfs.ext4,id=rootfs \
     -append "root=/dev/vda ro console=ttyS0" \
     -nographic
 
@@ -73,7 +73,7 @@ if [ -f "build-rootfs.sh" ]; then
     echo "🔧 自定义配置: 编辑 build-rootfs.sh"
     echo ""
     echo "   OPENEULER_RELEASE=\"24.03\""
-    echo "   OPENEULER_VERSION=\"SP3\""
+    echo "   OPENEULER_VERSION=\"SP2\""
     echo "   ARCH=\"riscv64\""
     echo ""
 fi

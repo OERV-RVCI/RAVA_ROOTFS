@@ -12,9 +12,9 @@ on:
         required: true
         default: '24.03'
       openeuler_version:
-        description: 'openEuler Version (e.g., SP3)'
+        description: 'openEuler Version (e.g., SP2)'
         required: true
-        default: 'SP3'
+        default: 'SP2'
 
 jobs:
 

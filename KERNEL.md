@@ -7,8 +7,8 @@
 ### 1.1 下载内核镜像包
 
 ```bash
-# openEuler 24.03 SP3 RISC-V 内核镜像包
-KERNEL_URL="https://repo.openeuler.org/openEuler-24.03/detached/YUM/SP3/standard_riscv64/Packages/"
+# openEuler 24.03 SP2 RISC-V 内核镜像包
+KERNEL_URL="https://repo.openeuler.org/openEuler-24.03/detached/YUM/SP2/standard_riscv64/Packages/"
 
 # 下载 kernel-image 包
 wget ${KERNEL_URL}/kernel-image-*.rpm
@@ -62,7 +62,7 @@ sudo dracut --force /tmp/initrd.img
 ```bash
 # 挂载 rootfs
 mkdir -p /mnt/rootfs
-mount -o loop openeuler-24.03-SP3-riscv64-rootfs.ext4 /mnt/rootfs
+mount -o loop openeuler-24.03-SP2-riscv64-rootfs.ext4 /mnt/rootfs
 
 # chroot 进入
 chroot /mnt/rootfs
@@ -174,7 +174,7 @@ qemu-system-riscv64 \
   -kernel Image \
   -initrd initrd.img \
   -device virtio-blk-device,drive=rootfs \
-  -drive if=none,file=openeuler-24.03-SP3-riscv64-rootfs.ext4,id=rootfs \
+  -drive if=none,file=openeuler-24.03-SP2-riscv64-rootfs.ext4,id=rootfs \
   -append "root=/dev/vda ro console=ttyS0" \
   -nographic
 ```
@@ -189,7 +189,7 @@ qemu-system-riscv64 \
   -kernel arch/riscv/boot/Image \
   -initrd initrd.img \
   -device virtio-blk-device,drive=rootfs \
-  -drive if=none,file=openeuler-24.03-SP3-riscv64-rootfs.ext4,id=rootfs \
+  -drive if=none,file=openeuler-24.03-SP2-riscv64-rootfs.ext4,id=rootfs \
   -append "root=/dev/vda ro console=ttyS0 init=/sbin/init" \
   -nographic
 ```
@@ -226,6 +226,6 @@ zcat /proc/config.gz | grep VIRTIO_BLK
 
 ## 相关资源
 
-- [openEuler 内核包仓库](https://repo.openeuler.org/openEuler-24.03/detached/YUM/SP3/standard_riscv64/Packages/)
+- [openEuler 内核包仓库](https://repo.openeuler.org/openEuler-24.03/detached/YUM/SP2/standard_riscv64/Packages/)
 - [Linux 内核文档](https://www.kernel.org/doc/html/latest/)
 - [dracut 文档](https://man7.org/linux/man-pages/man8/dracut.8.html)

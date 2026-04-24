@@ -1,10 +1,10 @@
 # openEuler RISC-V Rootfs 构建
 
-本仓库包含制作 openEuler 24.03 SP3 RISC-V 架构 rootfs 的流水线和脚本。
+本仓库包含制作 openEuler 24.03 SP2 RISC-V 架构 rootfs 的流水线和脚本。
 
 ## 功能
 
-- 构建 openEuler 24.03 SP3 RISC-V rootfs
+- 构建 openEuler 24.03 SP2 RISC-V rootfs
 - 根据 base.list 安装指定的软件包
 - 生成 ext4 文件系统镜像（单一 root 分区）
 - 打包 tar.xz 压缩包
@@ -67,8 +67,8 @@ docker run --rm --privileged -v $(pwd)/output:/workspace rootfs-builder:latest
 
 构建完成后，`output/` 目录下会生成：
 
-- `openeuler-24.03-SP3-riscv64-rootfs.ext4` - ext4 文件系统镜像
-- `openeuler-24.03-SP3-riscv64-rootfs.tar.xz` - rootfs 压缩包
+- `openeuler-24.03-SP2-riscv64-rootfs.ext4` - ext4 文件系统镜像
+- `openeuler-24.03-SP2-riscv64-rootfs.tar.xz` - rootfs 压缩包
 
 ## GitHub Actions 构建
 
@@ -101,7 +101,7 @@ qemu-system-riscv64 \
   -kernel /path/to/Image \
   -initrd /path/to/initrd \
   -device virtio-blk-device,drive=rootfs \
-  -drive if=none,file=openeuler-24.03-SP3-riscv64-rootfs.ext4,id=rootfs,format=raw \
+  -drive if=none,file=openeuler-24.03-SP2-riscv64-rootfs.ext4,id=rootfs,format=raw \
   -append "root=/dev/vda ro console=ttyS0" \
   -nographic
 ```
@@ -111,11 +111,11 @@ qemu-system-riscv64 \
 从 openEuler 下载 RISC-V 内核：
 ```bash
 # 内核镜像
-wget https://repo.openeuler.org/openEuler-24.03/detached/YUM/SP3/standard_riscv64/Packages/kernel-image-*.rpm
+wget https://repo.openeuler.org/openEuler-24.03/detached/YUM/SP2/standard_riscv64/Packages/kernel-image-*.rpm
 rpm2cpio kernel-image-*.rpm | cpio -idmv ./boot/Image
 
 # initrd
-wget https://repo.openeuler.org/openEuler-24.03/detached/YUM/SP3/standard_riscv64/Packages/kernel-modules-*.rpm
+wget https://repo.openeuler.org/openEuler-24.03/detached/YUM/SP2/standard_riscv64/Packages/kernel-modules-*.rpm
 ```
 
 ### 真机启动
@@ -123,7 +123,7 @@ wget https://repo.openeuler.org/openEuler-24.03/detached/YUM/SP3/standard_riscv6
 将 ext4 镜像写入存储设备：
 
 ```bash
-dd if=openeuler-24.03-SP3-riscv64-rootfs.ext4 of=/dev/sdX bs=1M status=progress
+dd if=openeuler-24.03-SP2-riscv64-rootfs.ext4 of=/dev/sdX bs=1M status=progress
 ```
 
 ## 默认配置
@@ -154,7 +154,7 @@ vim-enhanced
 
 ```bash
 OPENEULER_RELEASE="24.03"     # 发行版本
-OPENEULER_VERSION="SP3"       # 更新版本
+OPENEULER_VERSION="SP2"       # 更新版本
 ARCH="riscv64"                # 架构
 ```
 
