@@ -111,11 +111,11 @@ qemu-system-riscv64 \
 从 openEuler 下载 RISC-V 内核：
 ```bash
 # 内核镜像
-wget https://repo.openeuler.org/openEuler-24.03/detached/YUM/SP2/standard_riscv64/Packages/kernel-image-*.rpm
-rpm2cpio kernel-image-*.rpm | cpio -idmv ./boot/Image
+wget https://dl-cdn.openeuler.openatom.cn/openEuler-24.03-LTS-SP2/OS/riscv64/Packages/kernel-6.6.0-98.0.0.103.oe2403sp2.riscv64.rpm
+rpm2cpio kernel-6.6.0-98.0.0.103.oe2403sp2.riscv64.rpm | cpio -idmv ./boot/Image
 
-# initrd
-wget https://repo.openeuler.org/openEuler-24.03/detached/YUM/SP2/standard_riscv64/Packages/kernel-modules-*.rpm
+# 内核模块
+wget https://dl-cdn.openeuler.openatom.cn/openEuler-24.03-LTS-SP2/OS/riscv64/Packages/kernel-modules-6.6.0-98.0.0.103.oe2403sp2.riscv64.rpm
 ```
 
 ### 真机启动
