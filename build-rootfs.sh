@@ -1,7 +1,9 @@
 #!/bin/bash
 #
 # openEuler RISC-V Rootfs 构建脚本
-# 用于制作 openEuler 24.03 SP3 分支的 RISC-V rootfs
+# 支持两种模式：
+# 1. 容器内模式：直接安装到容器根目录（需要清理）
+# 2. 宿主机模式：使用 --installroot 到指定目录
 #
 
 set -e
@@ -11,18 +13,23 @@ OPENEULER_RELEASE="24.03"
 OPENEULER_VERSION="SP3"
 ARCH="riscv64"
 
-# 检测是否在 Docker 中
+# 检测运行环境
 if [ -f "/.dockerenv" ]; then
-    WORKSPACE="/workspace"
+    echo "检测到在容器内运行"
+    # 在容器内使用 installroot 方式（更干净）
+    ROOTFS_DIR="/workspace/rootfs"
+    ROOTFS_IMG="/workspace/openeuler-${OPENEULER_RELEASE}-${OPENEULER_VERSION}-${ARCH}-rootfs.ext4"
+    ROOTFS_TARBALL="/workspace/openeuler-${OPENEULER_RELEASE}-${OPENEULER_VERSION}-${ARCH}-rootfs.tar.xz"
     BASE_LIST="/workspace/base.list"
 else
+    echo "在宿主机运行"
     WORKSPACE="$(pwd)"
-    BASE_LIST="$(pwd)/base.list"
+    ROOTFS_DIR="${WORKSPACE}/rootfs"
+    ROOTFS_IMG="${WORKSPACE}/openeuler-${OPENEULER_RELEASE}-${OPENEULER_VERSION}-${ARCH}-rootfs.ext4"
+    ROOTFS_TARBALL="${WORKSPACE}/openeuler-${OPENEULER_RELEASE}-${OPENEULER_VERSION}-${ARCH}-rootfs.tar.xz"
+    BASE_LIST="${WORKSPACE}/base.list"
 fi
 
-ROOTFS_DIR="${WORKSPACE}/rootfs"
-ROOTFS_IMG="${WORKSPACE}/openeuler-${OPENEULER_RELEASE}-${OPENEULER_VERSION}-${ARCH}-rootfs.ext4"
-ROOTFS_TARBALL="${WORKSPACE}/openeuler-${OPENEULER_RELEASE}-${OPENEULER_VERSION}-${ARCH}-rootfs.tar.xz"
 REPO_URL="https://repo.openeuler.org/openEuler-${OPENEULER_RELEASE}/detached/YUM/${OPENEULER_VERSION}/standard_${ARCH}/"
 
 # 清理旧的构建产物
@@ -38,7 +45,7 @@ echo "openEuler Rootfs 构建"
 echo "========================================="
 echo "版本: ${OPENEULER_RELEASE} ${OPENEULER_VERSION}"
 echo "架构: ${ARCH}"
-echo "仓库: ${REPO_URL}"
+echo "构建目录: ${ROOTFS_DIR}"
 echo "========================================="
 
 # 创建基本目录结构
@@ -58,7 +65,6 @@ ln -sf /proc/self/fd/1 "${ROOTFS_DIR}/dev/stdout"
 ln -sf /proc/self/fd/2 "${ROOTFS_DIR}/dev/stderr"
 ln -sf /proc/kcore "${ROOTFS_DIR}/dev/core"
 
-# 配置仓库
 echo "配置 openEuler 软件源..."
 mkdir -p "${ROOTFS_DIR}/etc/yum.repos.d"
 
@@ -70,7 +76,6 @@ enabled=1
 gpgcheck=0
 EOF
 
-# 读取 base.list 包列表并安装
 echo "从 base.list 读取包列表并安装..."
 if [ -f "${BASE_LIST}" ]; then
     PACKAGES=$(cat "${BASE_LIST}" | tr '\n' ' ')
@@ -129,10 +134,10 @@ echo "root:openEuler12#$" | chroot "${ROOTFS_DIR}" chpasswd
 
 # 配置 systemd
 ln -sf /usr/lib/systemd/systemd "${ROOTFS_DIR}/init"
-chroot "${ROOTFS_DIR}" systemctl enable sshd.service
-chroot "${ROOTFS_DIR}" systemctl enable NetworkManager.service
-chroot "${ROOTFS_DIR}" systemctl enable systemd-networkd.service
-chroot "${ROOTFS_DIR}" systemctl enable systemd-resolved.service
+chroot "${ROOTFS_DIR}" systemctl enable sshd.service 2>/dev/null || true
+chroot "${ROOTFS_DIR}" systemctl enable NetworkManager.service 2>/dev/null || true
+chroot "${ROOTFS_DIR}" systemctl enable systemd-networkd.service 2>/dev/null || true
+chroot "${ROOTFS_DIR}" systemctl enable systemd-resolved.service 2>/dev/null || true
 
 # 创建网络配置
 mkdir -p "${ROOTFS_DIR}/etc/systemd/network"
@@ -155,7 +160,7 @@ rm -rf "${ROOTFS_DIR}/var/log/dnf.rpm.log"
 # 创建 ext4 镜像
 echo "创建 ext4 文件系统镜像..."
 ROOTFS_SIZE=$(du -sm "${ROOTFS_DIR}" | cut -f1)
-IMG_SIZE=$((ROOTFS_SIZE + 500))  # 增加 500MB 缓冲
+IMG_SIZE=$((ROOTFS_SIZE + 500))
 
 dd if=/dev/zero of="${ROOTFS_IMG}" bs=1M count="${IMG_SIZE}"
 mkfs.ext4 -F "${ROOTFS_IMG}"

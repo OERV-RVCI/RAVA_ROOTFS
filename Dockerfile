@@ -13,15 +13,15 @@ RUN dnf makecache \
         xz \
     && dnf clean all
 
-# 设置工作目录
-WORKDIR /workspace
-
-# 复制构建脚本和包列表
-COPY build-rootfs.sh /workspace/
+# 复制包列表和构建脚本
 COPY base.list /workspace/
+COPY build-rootfs.sh /workspace/
 
 # 给脚本执行权限
 RUN chmod +x /workspace/build-rootfs.sh
 
-# 默认执行构建
-ENTRYPOINT ["/workspace/build-rootfs.sh"]
+# 设置工作目录
+WORKDIR /workspace
+
+# 默认不执行任何操作，由外部调用
+CMD ["/bin/bash"]

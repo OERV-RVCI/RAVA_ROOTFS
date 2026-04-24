@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# 本地测试构建脚本
-# 用于在本地测试 rootfs 构建流程
+# 本地测试构建脚本（Docker 方式）
+# 在容器内直接安装和配置，然后导出
 #
 
 set -e
@@ -28,15 +28,15 @@ fi
 # 创建输出目录
 mkdir -p output
 
-# 构建 Docker 镜像
 echo "步骤 1: 构建 Docker 镜像..."
-docker build -t rootfs-builder:local .
+docker build -t rootfs-builder:latest .
 
 echo ""
-echo "步骤 2: 构建 rootfs..."
+echo "步骤 2: 在容器内构建 rootfs..."
 docker run --rm --privileged \
-    -v "$(pwd)/output:/workspace" \
-    rootfs-builder:local
+    -v $(pwd)/output:/workspace \
+    rootfs-builder:latest \
+    bash /workspace/build-rootfs.sh
 
 echo ""
 echo "========================================="
