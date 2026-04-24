@@ -108,12 +108,6 @@ cat > "${ROOTFS_DIR}/etc/hosts" << 'EOF'
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 EOF
 
-# 配置 resolv.conf
-cat > "${ROOTFS_DIR}/etc/resolv.conf" << 'EOF'
-nameserver 8.8.8.8
-nameserver 8.8.4.4
-EOF
-
 # 配置 sshd
 mkdir -p "${ROOTFS_DIR}/etc/ssh"
 echo "PasswordAuthentication yes" >> "${ROOTFS_DIR}/etc/ssh/sshd_config"
