@@ -45,7 +45,7 @@ jobs:
     - name: Display build artifacts
       run: |
         ls -lh output/
-        du -sh output/*
+        du -sh --apparent-size output/*
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4

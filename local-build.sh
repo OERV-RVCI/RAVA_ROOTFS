@@ -55,7 +55,7 @@ if [ -d "output" ] && [ "$(ls -A output)" ]; then
     ls -lh output/
     echo ""
     echo "文件大小:"
-    du -sh output/*
+    du -sh --apparent-size output/*
 else
     echo "警告: 没有找到输出文件"
 fi
