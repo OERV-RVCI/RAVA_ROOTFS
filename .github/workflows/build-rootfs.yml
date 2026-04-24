@@ -27,12 +27,16 @@ jobs:
     - name: Create a new builder instance
       run: docker buildx create --use --name insecure-builder --buildkitd-flags '--allow-insecure-entitlement security.insecure'
 
-    - name: Build rootfs
+    - name: Build Docker image
+      run: |
+        docker buildx build --load -t rootfs-builder .
+
+- name: Build rootfs
       run: |
         mkdir -p output
         docker run --rm --privileged \
           -v $(pwd)/output:/output \
-          rootfs-builder:local \
+          rootfs-builder \
           bash /workspace/build-rootfs.sh
 
     - name: Display build artifacts
