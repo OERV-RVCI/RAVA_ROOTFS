@@ -27,15 +27,15 @@ jobs:
     - name: Create a new builder instance
       run: docker buildx create --use --name insecure-builder --buildkitd-flags '--allow-insecure-entitlement security.insecure'
 
+    - name: Build Docker image
+      run: docker buildx build --load -t rootfs-builder .
+
     - name: Build rootfs
       run: |
         mkdir -p output
         docker run --rm --privileged \
           -v $(pwd)/output:/output \
           -v /dev:/dev \
-          -e HTTPS_PROXY=http://10.200.2.1:8586 \
-          -e HTTP_PROXY=http://10.200.2.1:8586 \
-          -e ALL_PROXY=socks5://10.200.2.1:8585 \
           rootfs-builder \
           bash /workspace/build-rootfs.sh
 
