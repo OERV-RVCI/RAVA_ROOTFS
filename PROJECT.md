@@ -54,8 +54,6 @@ RAVA_ROOTFS/
 
 关键配置：
 ```bash
-OPENEULER_RELEASE="24.03"
-OPENEULER_VERSION="SP2"
 ARCH="riscv64"
 REPO_URL="https://repo.openeuler.org/openEuler-24.03/detached/YUM/SP2/standard_riscv64/"
 ```
@@ -133,14 +131,6 @@ qemu-system-riscv64 \
 ```
 
 ## 自定义配置
-
-### 修改版本
-
-编辑 `build-rootfs.sh`:
-```bash
-OPENEULER_RELEASE="24.03"    # 修改为其他版本
-OPENEULER_VERSION="SP2"      # 修改为其他更新
-```
 
 ### 修改软件包列表
 

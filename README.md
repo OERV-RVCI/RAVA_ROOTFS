@@ -158,16 +158,6 @@ openssh-clients
 vim-enhanced
 ```
 
-### 修改版本
-
-编辑 `build-rootfs.sh`：
-
-```bash
-OPENEULER_RELEASE="24.03"     # 发行版本
-OPENEULER_VERSION="SP2"       # 更新版本
-ARCH="riscv64"                # 架构
-```
-
 ### 修改默认密码
 
 在 `build-rootfs.sh` 中修改：

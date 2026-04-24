@@ -74,8 +74,6 @@ if [ -f "build-rootfs.sh" ]; then
     echo ""
     echo "🔧 自定义配置: 编辑 build-rootfs.sh"
     echo ""
-    echo "   OPENEULER_RELEASE=\"24.03\""
-    echo "   OPENEULER_VERSION=\"SP2\""
     echo "   ARCH=\"riscv64\""
     echo ""
 fi
