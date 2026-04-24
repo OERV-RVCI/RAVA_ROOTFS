@@ -129,11 +129,16 @@ cat > "${ROOTFS_DIR}/etc/profile.d/proxy.sh" << 'PROXYEOF'
 export https_proxy=http://10.200.2.1:8586
 export http_proxy=http://10.200.2.1:8586
 export all_proxy=socks5://10.200.2.1:8585
-export no_proxy=localhost,127.0.0.1
 PROXYEOF
 chmod +x "${ROOTFS_DIR}/etc/profile.d/proxy.sh"
 
-echo "基本系统配置完成"
+echo "代理配置完成（用户登录后自动加载）"
+
+# 下载 stream.c 文件
+echo "下载 stream.c 文件到 /root/..."
+wget -O /root/stream.c https://www.cs.virginia.edu/stream/FTP/Code/stream.c
+
+echo "文件下载完成"
 
 # 清理 rpm 数据
 rm -rf "${ROOTFS_DIR}/var/cache/dnf"
