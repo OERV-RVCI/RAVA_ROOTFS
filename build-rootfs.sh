@@ -55,6 +55,7 @@ if [ -f "${BASE_LIST}" ]; then
 
     dnf install -y \
         --installroot="${ROOTFS_DIR}" \
+        --forcearch="${ARCH}" \
         --nodocs \
         --allowerasing \
         ${PACKAGES}
