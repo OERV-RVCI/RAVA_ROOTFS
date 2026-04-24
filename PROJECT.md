@@ -8,7 +8,7 @@
 
 ✅ 自动化构建流程（Docker + GitHub Actions）
 ✅ 根据 base.list 安装指定的软件包列表
-✅ 生成 ext4 文件系统镜像（单一 root 分区）
+✅ 生成 img.zst 镜像（zst 压缩）（单一 root 分区）
 ✅ 生成 tar.xz 压缩包
 ✅ 完整的文档和示例
 
@@ -49,7 +49,7 @@ RAVA_ROOTFS/
 - 配置 openEuler 软件源
 - 从 base.list 读取并安装软件包
 - 配置系统（fstab、hostname、网络、SSH）
-- 创建 ext4 文件系统镜像（单一 root 分区）
+- 创建 img.zst 镜像（zst 压缩）（单一 root 分区）
 - 打包 tar.xz
 
 关键配置：
@@ -111,8 +111,8 @@ cd /home/snail/Work/github/wangliu-iscas/OERV-RVCI/RAVA_ROOTFS
 
 位置: `output/` 目录
 
-- `openeuler-24.03-SP2-riscv64-rootfs.ext4` - ext4 文件系统镜像
-- `openeuler-24.03-SP2-riscv64-rootfs.tar.xz` - rootfs 压缩包
+- `openeuler-rootfs.img.zst` - img.zst 镜像（zst 压缩）
+- `openeuler-rootfs.tar.gz` - rootfs 压缩包（gz 压缩）
 
 ## QEMU 测试示例
 
@@ -124,7 +124,7 @@ qemu-system-riscv64 \
   -kernel /path/to/Image \
   -initrd /path/to/initrd \
   -device virtio-blk-device,drive=rootfs \
-  -drive if=none,file=output/openeuler-24.03-SP2-riscv64-rootfs.ext4,id=rootfs \
+  -drive if=none,file=output/openeuler-rootfs.img.zst,id=rootfs \
   -append "root=/dev/vda ro console=ttyS0" \
   -nographic
 ```

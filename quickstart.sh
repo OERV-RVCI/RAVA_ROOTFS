@@ -25,8 +25,8 @@ $ sudo ./native-build.sh
 
 📦 构建产物
 ─────────────────────────────────────────────────────────────────────
-output/openeuler-24.03-SP2-riscv64-rootfs.ext4  (ext4 镜像)
-output/openeuler-24.03-SP2-riscv64-rootfs.tar.xz (压缩包)
+output/openeuler-rootfs.img.zst  (img.zst 镜像，zst 压缩)
+output/openeuler-rootfs.tar.gz   (tar.gz 压缩包)
 
 🐏 QEMU 测试
 ─────────────────────────────────────────────────────────────────────
@@ -37,13 +37,16 @@ output/openeuler-24.03-SP2-riscv64-rootfs.tar.xz (压缩包)
 2. 从已安装系统提取
 3. 编译上游 Linux 内核
 
+# 先解压镜像
+$ zstd -d output/openeuler-rootfs.img.zst -o output/openeuler-rootfs.img
+
 # 准备内核后运行
 $ qemu-system-riscv64 \
     -M virt -m 2G -smp 4 \
     -kernel <kernel> \
     -initrd <initrd> \
     -device virtio-blk-device,drive=rootfs \
-    -drive if=none,file=output/openeuler-24.03-SP2-riscv64-rootfs.ext4,id=rootfs \
+    -drive if=none,file=output/openeuler-rootfs.img,id=rootfs \
     -append "root=/dev/vda ro console=ttyS0" \
     -nographic
 

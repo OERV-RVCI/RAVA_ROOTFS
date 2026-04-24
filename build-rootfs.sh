@@ -18,15 +18,15 @@ if [ -f "/.dockerenv" ]; then
     echo "检测到在容器内运行"
     # 在容器内使用 installroot 方式（更干净）
     ROOTFS_DIR="/workspace/rootfs"
-    ROOTFS_IMG="/workspace/openeuler-${OPENEULER_RELEASE}-${OPENEULER_VERSION}-${ARCH}-rootfs.ext4"
-    ROOTFS_TARBALL="/workspace/openeuler-${OPENEULER_RELEASE}-${OPENEULER_VERSION}-${ARCH}-rootfs.tar.xz"
+    ROOTFS_IMG="/workspace/openeuler-rootfs.img.zst"
+    ROOTFS_TARBALL="/workspace/openeuler-rootfs.tar.gz"
     BASE_LIST="/workspace/base.list"
 else
     echo "在宿主机运行"
     WORKSPACE="$(pwd)"
     ROOTFS_DIR="${WORKSPACE}/rootfs"
-    ROOTFS_IMG="${WORKSPACE}/openeuler-${OPENEULER_RELEASE}-${OPENEULER_VERSION}-${ARCH}-rootfs.ext4"
-    ROOTFS_TARBALL="${WORKSPACE}/openeuler-${OPENEULER_RELEASE}-${OPENEULER_VERSION}-${ARCH}-rootfs.tar.xz"
+    ROOTFS_IMG="${WORKSPACE}/openeuler-rootfs.img.zst"
+    ROOTFS_TARBALL="${WORKSPACE}/openeuler-rootfs.tar.gz"
     BASE_LIST="${WORKSPACE}/base.list"
 fi
 
@@ -148,13 +148,14 @@ IMG_SIZE=$((ROOTFS_SIZE + 2048))  # 预留 2GB 空间
 echo "rootfs 实际大小: ${ROOTFS_SIZE}MB"
 echo "镜像总大小: ${IMG_SIZE}MB (预留 2GB)"
 
-dd if=/dev/zero of="${ROOTFS_IMG}" bs=1M count="${IMG_SIZE}"
-mkfs.ext4 -F "${ROOTFS_IMG}"
+TEMP_IMG="/tmp/rootfs_temp.img"
+dd if=/dev/zero of="${TEMP_IMG}" bs=1M count="${IMG_SIZE}" 2>/dev/null
+mkfs.ext4 -F "${TEMP_IMG}" 2>/dev/null
 
 # 挂载并复制文件
 MOUNT_DIR="/tmp/rootfs_mount"
 mkdir -p "${MOUNT_DIR}"
-mount -o loop "${ROOTFS_IMG}" "${MOUNT_DIR}"
+mount -o loop "${TEMP_IMG}" "${MOUNT_DIR}"
 
 cp -a "${ROOTFS_DIR}"/* "${MOUNT_DIR}/"
 
@@ -165,21 +166,26 @@ chmod 755 "${MOUNT_DIR}"
 umount "${MOUNT_DIR}"
 rm -rf "${MOUNT_DIR}"
 
-echo "ext4 镜像创建完成: ${ROOTFS_IMG}"
+# 使用 zst 压缩镜像
+echo "使用 zst 压缩镜像..."
+zstd -f "${TEMP_IMG}" -o "${ROOTFS_IMG}"
+rm -f "${TEMP_IMG}"
 
-# 打包 tar.xz
+echo "img.zst 镜像创建完成: ${ROOTFS_IMG}"
+
+# 打包 tar.gz
 echo "打包 rootfs..."
-tar -cJf "${ROOTFS_TARBALL}" -C "${ROOTFS_DIR}" .
+tar -czf "${ROOTFS_TARBALL}" -C "${ROOTFS_DIR}" .
 
-echo "tar.xz 打包完成: ${ROOTFS_TARBALL}"
+echo "tar.gz 打包完成: ${ROOTFS_TARBALL}"
 
 # 显示文件信息
 echo "========================================="
 echo "构建完成！"
 echo "========================================="
-echo "ext4 镜像: ${ROOTFS_IMG}"
+echo "img.zst 镜像: ${ROOTFS_IMG}"
 du -h "${ROOTFS_IMG}"
 echo ""
-echo "tar.xz 包: ${ROOTFS_TARBALL}"
+echo "tar.gz 包: ${ROOTFS_TARBALL}"
 du -h "${ROOTFS_TARBALL}"
 echo "========================================="

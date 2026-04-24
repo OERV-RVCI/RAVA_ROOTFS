@@ -127,7 +127,7 @@ REPO_URL="https://mirrors.huaweicloud.com/openeuler/openEuler-24.03/detached/YUM
 **解决**:
 ```bash
 # 检查镜像
-fsck.ext4 -f openeuler-24.03-SP2-riscv64-rootfs.ext4
+fsck.ext4 -f openeuler-rootfs.img.zst
 
 # 重新创建
 dd if=/dev/zero of=image.ext4 bs=1M count=2048

@@ -11,6 +11,7 @@ RUN dnf makecache \
         kpartx \
         rsync \
         xz \
+        zstd \
     && dnf clean all
 
 # 复制包列表和构建脚本
