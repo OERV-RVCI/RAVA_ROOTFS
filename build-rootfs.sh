@@ -176,10 +176,6 @@ mount -o loop "${TEMP_IMG}" "${MOUNT_DIR}"
 
 cp -a "${ROOTFS_DIR}/" "${MOUNT_DIR}/"
 
-# 设置权限
-chmod 1777 "${MOUNT_DIR}/tmp"
-chmod 755 "${MOUNT_DIR}"
-
 umount "${MOUNT_DIR}"
 rm -rf "${MOUNT_DIR}"
 
