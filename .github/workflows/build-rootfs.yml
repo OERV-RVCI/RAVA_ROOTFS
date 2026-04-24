@@ -45,7 +45,7 @@ jobs:
     - name: Display build artifacts
       run: |
         ls -lh output/
-        du -sh --apparent-size output/*
+        du -sh --apparent-size output/*.zst output/*.tar.gz 2>/dev/null || true
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
