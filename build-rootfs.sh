@@ -80,16 +80,13 @@ echo "软件包安装完成"
 # 配置基本系统
 echo "配置基本系统..."
 
-# 创建 fstab（单一 root 分区 + 虚拟文件系统）
+# 创建 fstab（单一 root 分区）
 cat > "${ROOTFS_DIR}/etc/fstab" << 'EOF'
 # /etc/fstab
 # Created by rootfs build script
 # Single root partition
 
-/dev/vda  /      ext4    defaults    0 1
-devpts   /dev/pts devpts   defaults    0 0
-proc     /proc   proc     defaults    0 0
-sys      /sys    sysfs    defaults    0 0
+/dev/vda  /  ext4  defaults  0 1
 EOF
 
 # 配置 hostname
