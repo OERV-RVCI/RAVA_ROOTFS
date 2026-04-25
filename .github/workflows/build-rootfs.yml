@@ -51,5 +51,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: openeuler-rootfs
-        path: output/
+        path: |
+          output/*.zst
+          output/*.tar.gz
         retention-days: 30
