@@ -47,18 +47,16 @@ jobs:
         ls -lh output/
         du -sh --apparent-size output/*.zst output/*.tar.gz 2>/dev/null || true
 
-    - name: Compress artifacts to zip
-      run: |
-        cd output
-        zip -j openeuler-rootfs.zst.zip *.zst
-        zip -j openeuler-rootfs.tar.gz.zip *.tar.gz
-        ls -lh *.zip
-
-    - name: Upload artifacts
+    - name: Upload zst artifact
       uses: actions/upload-artifact@v4
       with:
-        name: openeuler-rootfs
-        path: |
-          output/openeuler-rootfs.zst.zip
-          output/openeuler-rootfs.tar.gz.zip
+        name: openeuler-rootfs.zst
+        path: output/*.zst
+        retention-days: 30
+
+    - name: Upload tar.gz artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: openeuler-rootfs.tar.gz
+        path: output/*.tar.gz
         retention-days: 30
