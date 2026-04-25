@@ -50,7 +50,7 @@ jobs:
     - name: Upload zst artifact
       uses: actions/upload-artifact@v4
       with:
-        name: openeuler-rootfs.zst
+        name: openeuler-rootfs.img.zst
         path: output/*.zst
         retention-days: 30
 
