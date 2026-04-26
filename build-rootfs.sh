@@ -1,23 +1,27 @@
 #!/bin/bash
 #
-# openEuler RISC-V Rootfs 构建脚本
-# 支持两种模式：
-#   容器模式：在 Docker 容器内运行，输出到 /output
-#   本地模式：在宿主机直接运行，输出到当前目录
+# Rootfs 构建脚本
+# 支持多种发行版: openeuler, openruyi
 #
-# 用法：
-#   容器模式：docker run --privileged ... build-rootfs.sh
-#   本地模式：sudo bash build-rootfs.sh
+# 用法:
+#   容器模式: docker run --privileged ... build-rootfs.sh [distro]
+#   本地模式: sudo bash build-rootfs.sh [distro]
+#
+# 发行版参数:
+#   openeuler  - openEuler 24.03 SP2 RISC-V (默认)
+#   openruyi   - openRuyi RVA23 RISC-V64
 #
 
 set -euo pipefail
 
 # ============================================================================
-# 配置
+# 加载配置
 # ============================================================================
 
-ARCH="riscv64"
-EXTRA_SPACE_MB=2048  # 镜像预留空间
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DISTRO="${1:-openeuler}"
+
+source "${SCRIPT_DIR}/config.sh" "${DISTRO}"
 
 # ============================================================================
 # 环境检测
@@ -35,8 +39,8 @@ detect_environment() {
     fi
 
     ROOTFS_DIR="${WORKSPACE}/rootfs"
-    ROOTFS_IMG="${WORKSPACE}/openeuler-rootfs.img.zst"
-    ROOTFS_TARBALL="${WORKSPACE}/openeuler-rootfs.tar.gz"
+    ROOTFS_IMG="${WORKSPACE}/${DISTRO}-rootfs.img.zst"
+    ROOTFS_TARBALL="${WORKSPACE}/${DISTRO}-rootfs.tar.gz"
 }
 
 # ============================================================================
@@ -44,7 +48,7 @@ detect_environment() {
 # ============================================================================
 
 log() {
-    echo "[openEuler] $*"
+    echo "[${DISTRO_NAME}] $*"
 }
 
 log_section() {
@@ -88,12 +92,10 @@ cleanup_mounts() {
     for m in "${ROOTFS_DIR}/dev/pts" "${ROOTFS_DIR}/dev" "${ROOTFS_DIR}/sys" "${ROOTFS_DIR}/proc"; do
         umount "$m" 2>/dev/null || true
     done
-    # 清理临时镜像挂载
     if [ -n "${TEMP_MOUNT_DIR:-}" ] && [ -d "${TEMP_MOUNT_DIR}" ]; then
         umount "${TEMP_MOUNT_DIR}" 2>/dev/null || true
         rm -rf "${TEMP_MOUNT_DIR}"
     fi
-    # 清理临时镜像
     rm -f "${TEMP_IMG:-}"
 }
 
@@ -124,7 +126,6 @@ install_packages() {
 
     log "从 base.list 读取 ${pkg_count} 个软件包..."
 
-    # 挂载虚拟文件系统
     mount -t proc proc "${ROOTFS_DIR}/proc"
     mount -t sysfs sysfs "${ROOTFS_DIR}/sys"
     mount --bind /dev "${ROOTFS_DIR}/dev"
@@ -144,41 +145,34 @@ install_packages() {
 configure_system() {
     log "配置基本系统..."
 
-    # fstab
     cat > "${ROOTFS_DIR}/etc/fstab" << 'EOF'
 # /etc/fstab
 /dev/vda  /  ext4  defaults  0 1
 EOF
 
-    # hostname
-    echo "openeuler-riscv64" > "${ROOTFS_DIR}/etc/hostname"
+    echo "${HOSTNAME}" > "${ROOTFS_DIR}/etc/hostname"
 
-    # hosts
     cat > "${ROOTFS_DIR}/etc/hosts" << 'EOF'
 127.0.0.1   localhost localhost.localdomain
 ::1         localhost localhost.localdomain
 EOF
 
-    # SSH
     mkdir -p "${ROOTFS_DIR}/etc/ssh"
     {
         echo "PasswordAuthentication yes"
         echo "PermitRootLogin yes"
     } >> "${ROOTFS_DIR}/etc/ssh/sshd_config"
 
-    # root 密码
-    echo "root:openEuler12#$" | chroot "${ROOTFS_DIR}" chpasswd
+    echo "root:${ROOT_PASSWORD}" | chroot "${ROOTFS_DIR}" chpasswd
 
-    # systemd
     ln -sf /usr/lib/systemd/systemd "${ROOTFS_DIR}/init"
     chroot "${ROOTFS_DIR}" systemctl enable sshd.service 2>/dev/null || true
     chroot "${ROOTFS_DIR}" systemctl enable NetworkManager.service 2>/dev/null || true
 
-    # NTP 时间同步
-    cat > "${ROOTFS_DIR}/etc/systemd/timesyncd.conf" << 'EOF'
+    cat > "${ROOTFS_DIR}/etc/systemd/timesyncd.conf" << EOF
 [Time]
-NTP=ntp.aliyun.com ntp.tencent.com
-FallbackNTP=0.pool.ntp.org 1.pool.ntp.org
+NTP=${NTP_SERVERS}
+FallbackNTP=${FALLBACK_NTP}
 EOF
 
     log "基本系统配置完成"
@@ -187,15 +181,13 @@ EOF
 configure_network() {
     log "配置代理和网络..."
 
-    # 代理配置
-    cat > "${ROOTFS_DIR}/etc/profile.d/proxy.sh" << 'EOF'
-export https_proxy=http://10.200.2.1:8586
-export http_proxy=http://10.200.2.1:8586
-export all_proxy=socks5://10.200.2.1:8585
+    cat > "${ROOTFS_DIR}/etc/profile.d/proxy.sh" << EOF
+export https_proxy=${PROXY_HTTPS}
+export http_proxy=${PROXY_HTTP}
+export all_proxy=${PROXY_SOCKS}
 EOF
     chmod +x "${ROOTFS_DIR}/etc/profile.d/proxy.sh"
 
-    # 下载 stream.c 基准测试工具
     log "下载 stream.c..."
     mkdir -p "${ROOTFS_DIR}/root"
     wget -q -O "${ROOTFS_DIR}/root/stream.c" \
@@ -212,7 +204,6 @@ cleanup_rootfs() {
     rm -f "${ROOTFS_DIR}/var/log/yum.log"
     rm -f "${ROOTFS_DIR}/var/log/dnf.rpm.log"
 
-    # 卸载虚拟文件系统
     cleanup_mounts
 }
 
@@ -221,9 +212,9 @@ create_image() {
 
     local rootfs_size
     rootfs_size=$(du -sm "${ROOTFS_DIR}" | cut -f1)
-    local img_size=$((rootfs_size + EXTRA_SPACE_MB))
+    local img_size=$((rootfs_size + 2048))
 
-    log "rootfs 大小: ${rootfs_size}MB, 镜像大小: ${img_size}MB (含 ${EXTRA_SPACE_MB}MB 预留)"
+    log "rootfs 大小: ${rootfs_size}MB, 镜像大小: ${img_size}MB (含 2GB 预留)"
 
     TEMP_IMG=$(mktemp /tmp/rootfs-XXXXXX.img)
     TEMP_MOUNT_DIR=$(mktemp -d /tmp/rootfs-mount-XXXX)
@@ -239,7 +230,6 @@ create_image() {
     rmdir "${TEMP_MOUNT_DIR}"
     TEMP_MOUNT_DIR=""
 
-    # zstd 压缩
     log "压缩镜像 (zstd)..."
     zstd -f "${TEMP_IMG}" -o "${ROOTFS_IMG}"
 
@@ -256,6 +246,7 @@ create_tarball() {
 
 show_summary() {
     log_section "构建完成！"
+    log "发行版: ${DISTRO_NAME} ${DISTRO_VERSION} (${PROFILE})"
     log "镜像:   ${ROOTFS_IMG}"
     log "压缩包: ${ROOTFS_TARBALL}"
     echo ""
@@ -271,10 +262,21 @@ main() {
     detect_environment
     check_requirements
 
-    log_section "openEuler RISC-V Rootfs 构建"
-    log "模式: ${ENV_MODE}"
-    log "架构: ${ARCH}"
-    log "输出: ${WORKSPACE}"
+    # 设置显示版本
+    if [ -n "${DISPLAY_DISTRO_VERSION:-}" ]; then
+        DISPLAY_VER="${DISPLAY_DISTRO_VERSION}"
+    else
+        DISPLAY_VER="${DISTRO_VERSION}"
+    fi
+
+    log_section "${DISTRO_NAME} Rootfs 构建"
+    log "发行版: ${DISTRO_NAME}"
+    if [ -n "${DISPLAY_VER}" ]; then
+        log "版本:   ${DISPLAY_VER}"
+    fi
+    log "架构:   ${ARCH} (${PROFILE})"
+    log "模式:   ${ENV_MODE}"
+    log "输出:   ${WORKSPACE}"
 
     setup_directories
     install_packages

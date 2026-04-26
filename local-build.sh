@@ -1,13 +1,16 @@
 #!/bin/bash
 #
 # 本地 Docker 构建入口
-# 用法: ./local-build.sh
+# 用法: ./local-build.sh [distro]
+#   distro: openeuler (默认) 或 openruyi
 #
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${SCRIPT_DIR}"
+
+DISTRO="${1:-openeuler}"
 
 # 检查 Docker
 if ! command -v docker &>/dev/null; then
@@ -23,11 +26,23 @@ fi
 mkdir -p output
 
 echo "========================================="
-echo " openEuler RISC-V Rootfs Docker 构建"
+echo " Rootfs Docker 构建 (${DISTRO})"
 echo "========================================="
 
+# 选择 Dockerfile
+if [ "${DISTRO}" = "openruyi" ]; then
+    DOCKERFILE="Dockerfile.openruyi"
+else
+    DOCKERFILE="Dockerfile"
+fi
+
+if [ ! -f "${DOCKERFILE}" ]; then
+    echo "错误: Dockerfile 不存在 (${DOCKERFILE})"
+    exit 1
+fi
+
 echo "步骤 1/2: 构建 Docker 镜像..."
-docker build -t rootfs-builder:latest .
+docker build -f "${DOCKERFILE}" -t rootfs-builder:latest .
 
 echo ""
 echo "步骤 2/2: 在容器内构建 rootfs..."
@@ -38,7 +53,7 @@ docker run --rm --privileged \
     -v /sys:/sys \
     -v /proc:/proc \
     rootfs-builder:latest \
-    bash /workspace/build-rootfs.sh
+    bash /workspace/build-rootfs.sh "${DISTRO}"
 
 echo ""
 echo "========================================="

@@ -1,13 +1,18 @@
 #!/bin/bash
 #
-# 快速开始指南 - openEuler RISC-V Rootfs 构建
+# 快速开始指南 - Rootfs 构建
 #
 
 cat << 'EOF'
 
 ╔════════════════════════════════════════════════════════════════════╗
-║         openEuler RISC-V Rootfs 构建快速开始                      ║
+║              Rootfs 构建快速开始                                  ║
 ╚════════════════════════════════════════════════════════════════════╝
+
+📋 支持的发行版
+─────────────────────────────────────────────────────────────────────
+  openeuler  - openEuler 24.03 SP2 RISC-V (RVA20)
+  openruyi   - openRuyi RISC-V64
 
 📋 前提条件
 ─────────────────────────────────────────────────────────────────────
@@ -18,15 +23,17 @@ cat << 'EOF'
 🚀 快速构建
 ─────────────────────────────────────────────────────────────────────
 Docker 方式（推荐）:
-  $ ./local-build.sh
+  $ ./local-build.sh              # openEuler (默认)
+  $ ./local-build.sh openruyi     # openRuyi
 
 本地直接构建（需要 root）:
-  $ sudo bash build-rootfs.sh
+  $ sudo bash build-rootfs.sh openeuler
+  $ sudo bash build-rootfs.sh openruyi
 
 📦 构建产物
 ─────────────────────────────────────────────────────────────────────
-output/openeuler-rootfs.img.zst  (zstd 压缩的 ext4 镜像)
-output/openeuler-rootfs.tar.gz   (tar.gz 压缩包)
+output/{distro}-rootfs.img.zst  (zstd 压缩的 ext4 镜像)
+output/{distro}-rootfs.tar.gz   (tar.gz 压缩包)
 
 🐏 QEMU 测试
 ─────────────────────────────────────────────────────────────────────

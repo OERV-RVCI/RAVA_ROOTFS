@@ -1,0 +1,29 @@
+FROM git.openruyi.cn/openruyi/creek-x86-64:latest
+
+# 安装 rootfs 构建工具
+RUN dnf makecache \
+    && dnf install -y \
+        dnf \
+        dnf-plugins-core \
+        e2fsprogs \
+        util-linux \
+        zstd \
+        wget \
+        tar \
+    && dnf clean all
+
+# 配置 openRuyi RVA23 软件源
+RUN cat > /etc/yum.repos.d/openruyi-unstable.repo << 'EOF'
+[openruyi-unstable]
+name=openRuyi Unstable RVA23
+baseurl=https://boat.openruyi.cn/unstable/rva23
+enabled=1
+gpgcheck=0
+EOF
+
+COPY base.list /workspace/
+COPY build-rootfs.sh /workspace/
+RUN chmod +x /workspace/build-rootfs.sh
+
+WORKDIR /workspace
+CMD ["/bin/bash"]

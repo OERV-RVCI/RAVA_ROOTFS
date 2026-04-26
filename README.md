@@ -1,12 +1,19 @@
-# openEuler RISC-V Rootfs 构建
+# Rootfs 构建
 
-自动化构建 openEuler 24.03 SP2 RISC-V 架构 rootfs 的流水线和脚本。
+自动化构建 RISC-V 架构 rootfs 的流水线和脚本。
+
+## 支持的发行版
+
+| 发行版 | 架构 | 配置文件 |
+|--------|------|----------|
+| openEuler 24.03 SP2 | riscv64 (RVA20) | `openeuler` (默认) |
+| openRuyi | riscv64 (RVA23) | `openruyi` |
 
 ## 功能
 
-- ✅ 根据 `base.list` 安装指定软件包（124 个包）
-- ✅ 生成 `openeuler-rootfs.img.zst`（zstd 压缩的 ext4 镜像，单一 root 分区）
-- ✅ 生成 `openeuler-rootfs.tar.gz`（tar.gz 压缩包）
+- ✅ 根据 `base.list` 安装指定软件包
+- ✅ 生成 `{distro}-rootfs.img.zst`（zstd 压缩的 ext4 镜像）
+- ✅ 生成 `{distro}-rootfs.tar.gz`（tar.gz 压缩包）
 - ✅ 支持 Docker 构建和本地直接构建
 - ✅ GitHub Actions 自动构建
 
@@ -16,8 +23,10 @@
 
 ```
 RAVA_ROOTFS/
-├── Dockerfile                    # Docker 镜像构建文件
+├── Dockerfile                    # openEuler Docker 镜像
+├── Dockerfile.openruyi           # openRuyi Docker 镜像
 ├── build-rootfs.sh               # rootfs 构建核心脚本
+├── config.sh                     # 发行版配置
 ├── local-build.sh                # Docker 本地构建入口
 ├── base.list                     # 软件包列表
 ├── quickstart.sh                 # 快速开始指南
@@ -32,22 +41,23 @@ RAVA_ROOTFS/
 ### 方式 1：Docker 构建（推荐）
 
 ```bash
+# 构建 openEuler (默认)
 chmod +x local-build.sh
 ./local-build.sh
-```
 
-- 隔离环境，不污染宿主机
-- 保证构建一致性
+# 构建 openRuyi
+./local-build.sh openruyi
+```
 
 ### 方式 2：本地直接构建
 
 ```bash
-# 需要 root 权限和必要工具（dnf, qemu-img, e2fsprogs, zstd）
-sudo bash build-rootfs.sh
-```
+# openEuler
+sudo bash build-rootfs.sh openeuler
 
-- 不需要 Docker，更快
-- 需要 root 权限
+# openRuyi
+sudo bash build-rootfs.sh openruyi
+```
 
 ### 方式 3：GitHub Actions
 
@@ -55,12 +65,10 @@ sudo bash build-rootfs.sh
 
 ## 构建产物
 
-构建完成后，`output/` 目录下会生成：
-
-| 文件 | 说明 |
-|------|------|
-| `openeuler-rootfs.img.zst` | zstd 压缩的 ext4 镜像 |
-| `openeuler-rootfs.tar.gz` | tar.gz 压缩包 |
+| 发行版 | 镜像文件 | 压缩包 |
+|--------|----------|--------|
+| openEuler | `openeuler-rootfs.img.zst` | `openeuler-rootfs.tar.gz` |
+| openRuyi | `openruyi-rootfs.img.zst` | `openruyi-rootfs.tar.gz` |
 
 ## 使用 rootfs
 
@@ -84,22 +92,22 @@ qemu-system-riscv64 \
 ### 真机启动
 
 ```bash
-zstd -d openeuler-rootfs.img.zst -o openeuler-rootfs.img
-dd if=openeuler-rootfs.img of=/dev/sdX bs=1M status=progress
+zstd -d output/openeuler-rootfs.img.zst -o output/openeuler-rootfs.img
+dd if=output/openeuler-rootfs.img of=/dev/sdX bs=1M status=progress
 ```
 
 ## 默认配置
 
-| 项目 | 值 |
-|------|-----|
-| 用户 | root |
-| 密码 | openEuler12#$（登录后请修改） |
-| SSH | 允许 root 密码登录 |
-| 网络 | DHCP 自动获取 |
-| 分区 | 单一 root 分区（/dev/vda） |
-| 时间同步 | systemd-timesyncd（阿里云/腾讯云 NTP） |
-| 代理 | 已配置（`/etc/profile.d/proxy.sh`） |
-| 预装文件 | `/root/stream.c`（stream 基准测试工具源码） |
+| 项目 | openEuler (RVA20) | openRuyi (RVA23) |
+|------|-----------|----------|
+| 主机名 | openeuler-rva20 | openruyi-rva23 |
+| root 密码 | openEuler12#$ | openEuler12#$ |
+| SSH | 允许 root 密码登录 | 允许 root 密码登录 |
+| 网络 | DHCP 自动获取 | DHCP 自动获取 |
+| 分区 | 单一 root 分区 (/dev/vda) | 单一 root 分区 (/dev/vda) |
+| 时间同步 | systemd-timesyncd | systemd-timesyncd |
+| 代理 | 已配置 (/etc/profile.d/proxy.sh) | 已配置 |
+| 预装文件 | /root/stream.c | /root/stream.c |
 
 ## 自定义
 
@@ -113,23 +121,27 @@ openssh-server
 vim-enhanced
 ```
 
-### 修改默认密码
+### 修改发行版配置
 
-在 `build-rootfs.sh` 中修改：
+编辑 `config.sh`，添加或修改发行版配置：
 
 ```bash
-echo "root:your_new_password" | chroot "${ROOTFS_DIR}" chpasswd
+mydistro)
+    DISTRO_NAME="MyDistro"
+    DISTRO_VERSION="1.0"
+    ARCH="riscv64"
+    PROFILE="myprofile"
+    CONTAINER_IMAGE="myrepo/myimage:tag"
+    REPO_URL="https://myrepo.example.com/path"
+    ...
+    ;;
 ```
-
-### 修改代理配置
-
-在 `build-rootfs.sh` 中修改 proxy.sh 的生成部分。
 
 ## 常见问题
 
 **Q: 构建失败，网络问题？**
 
-A: 替换为国内镜像源，在 `build-rootfs.sh` 中修改 REPO_URL。
+A: 替换为国内镜像源，在 `config.sh` 中修改 `REPO_URL`。
 
 **Q: Docker 权限问题？**
 
@@ -151,7 +163,7 @@ A: 本 rootfs 不包含内核，请自行准备内核和 initrd。
 
 - Docker（方式 1）或 root 权限（方式 2）
 - 磁盘空间 > 5GB
-- 网络连接（访问 openEuler 软件源）
+- 网络连接（访问软件源）
 
 ## License
 
