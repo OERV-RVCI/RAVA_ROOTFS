@@ -2,203 +2,288 @@
 #
 # openEuler RISC-V Rootfs 构建脚本
 # 支持两种模式：
-# 1. 容器内模式：直接安装到容器根目录（需要清理）
-# 2. 宿主机模式：使用 --installroot 到指定目录
+#   容器模式：在 Docker 容器内运行，输出到 /output
+#   本地模式：在宿主机直接运行，输出到当前目录
+#
+# 用法：
+#   容器模式：docker run --privileged ... build-rootfs.sh
+#   本地模式：sudo bash build-rootfs.sh
 #
 
-set -e
+set -euo pipefail
 
-# 配置变量
+# ============================================================================
+# 配置
+# ============================================================================
+
 ARCH="riscv64"
+EXTRA_SPACE_MB=2048  # 镜像预留空间
 
-echo "构建配置:"
-echo "  架构: ${ARCH}"
-echo "  使用容器默认软件源配置"
+# ============================================================================
+# 环境检测
+# ============================================================================
 
-# 检测运行环境
-if [ -f "/.dockerenv" ]; then
-    echo "检测到在容器内运行"
-    # 在容器内使用 installroot 方式（更干净）
-    # 优先使用 /output 目录（用于 GitHub Actions）
-    if [ -d "/output" ]; then
-        WORKSPACE="/output"
+detect_environment() {
+    if [ -f "/.dockerenv" ]; then
+        ENV_MODE="container"
+        WORKSPACE="${OUTPUT_DIR:-/output}"
+        BASE_LIST="/workspace/base.list"
     else
-        WORKSPACE="/workspace"
+        ENV_MODE="local"
+        WORKSPACE="$(pwd)"
+        BASE_LIST="${WORKSPACE}/base.list"
     fi
+
     ROOTFS_DIR="${WORKSPACE}/rootfs"
     ROOTFS_IMG="${WORKSPACE}/openeuler-rootfs.img.zst"
     ROOTFS_TARBALL="${WORKSPACE}/openeuler-rootfs.tar.gz"
-    BASE_LIST="/workspace/base.list"
-else
-    echo "在宿主机运行"
-    WORKSPACE="$(pwd)"
-    ROOTFS_DIR="${WORKSPACE}/rootfs"
-    ROOTFS_IMG="${WORKSPACE}/openeuler-rootfs.img.zst"
-    ROOTFS_TARBALL="${WORKSPACE}/openeuler-rootfs.tar.gz"
-    BASE_LIST="${WORKSPACE}/base.list"
-fi
+}
 
-# 清理旧的构建产物
-rm -rf "${ROOTFS_DIR}"
-rm -f "${ROOTFS_IMG}"
-rm -f "${ROOTFS_TARBALL}"
+# ============================================================================
+# 工具函数
+# ============================================================================
 
-# 创建 rootfs 根目录
-mkdir -p "${ROOTFS_DIR}"
+log() {
+    echo "[openEuler] $*"
+}
 
-# 创建必要的虚拟文件系统目录
-mkdir -p "${ROOTFS_DIR}"/{dev,sys,proc}
-mkdir -p "${ROOTFS_DIR}/dev/pts"
+log_section() {
+    echo ""
+    echo "========================================="
+    echo " $1"
+    echo "========================================="
+}
 
-echo "========================================="
-echo "openEuler Rootfs 构建"
-echo "========================================="
-echo "架构: ${ARCH}"
-echo "构建目录: ${ROOTFS_DIR}"
-echo "使用容器默认软件源配置"
-echo "========================================="
+check_requirements() {
+    local missing=()
+    local cmds=("dnf" "mkfs.ext4" "zstd" "mount" "umount" "dd" "tar" "wget")
 
-echo "从 base.list 读取包列表并安装..."
-if [ -f "${BASE_LIST}" ]; then
-    PACKAGES=$(cat "${BASE_LIST}" | tr '\n' ' ')
-    echo "安装以下软件包:"
-    echo "${PACKAGES}"
+    for cmd in "${cmds[@]}"; do
+        if ! command -v "$cmd" &>/dev/null; then
+            missing+=("$cmd")
+        fi
+    done
 
-    # 临时挂载虚拟文件系统
-    echo "挂载虚拟文件系统..."
-    mount -t proc /proc "${ROOTFS_DIR}/proc"
-    mount -t sysfs /sys "${ROOTFS_DIR}/sys"
+    if [ ${#missing[@]} -gt 0 ]; then
+        log "错误: 缺少必要工具: ${missing[*]}"
+        if [ "$ENV_MODE" = "local" ]; then
+            log "请安装: sudo dnf install -y dnf e2fsprogs zstd util-linux wget tar"
+        fi
+        exit 1
+    fi
+
+    if [ "$ENV_MODE" = "local" ] && [ "$EUID" -ne 0 ]; then
+        log "错误: 本地模式需要 root 权限"
+        log "请使用: sudo $0"
+        exit 1
+    fi
+}
+
+MOUNTS_CLEANED=false
+
+cleanup_mounts() {
+    if $MOUNTS_CLEANED; then return; fi
+    MOUNTS_CLEANED=true
+
+    for m in "${ROOTFS_DIR}/dev/pts" "${ROOTFS_DIR}/dev" "${ROOTFS_DIR}/sys" "${ROOTFS_DIR}/proc"; do
+        umount "$m" 2>/dev/null || true
+    done
+    # 清理临时镜像挂载
+    if [ -n "${TEMP_MOUNT_DIR:-}" ] && [ -d "${TEMP_MOUNT_DIR}" ]; then
+        umount "${TEMP_MOUNT_DIR}" 2>/dev/null || true
+        rm -rf "${TEMP_MOUNT_DIR}"
+    fi
+    # 清理临时镜像
+    rm -f "${TEMP_IMG:-}"
+}
+
+trap cleanup_mounts EXIT
+
+# ============================================================================
+# 构建步骤
+# ============================================================================
+
+setup_directories() {
+    log "清理旧的构建产物..."
+    rm -rf "${ROOTFS_DIR}"
+    rm -f "${ROOTFS_IMG}" "${ROOTFS_TARBALL}"
+
+    mkdir -p "${ROOTFS_DIR}"/{dev,sys,proc,dev/pts}
+}
+
+install_packages() {
+    if [ ! -f "${BASE_LIST}" ]; then
+        log "错误: base.list 不存在 (${BASE_LIST})"
+        exit 1
+    fi
+
+    local packages
+    packages=$(grep -v '^\s*#' "${BASE_LIST}" | grep -v '^\s*$' | tr '\n' ' ')
+    local pkg_count
+    pkg_count=$(grep -v '^\s*#' "${BASE_LIST}" | grep -v '^\s*$' | wc -l)
+
+    log "从 base.list 读取 ${pkg_count} 个软件包..."
+
+    # 挂载虚拟文件系统
+    mount -t proc proc "${ROOTFS_DIR}/proc"
+    mount -t sysfs sysfs "${ROOTFS_DIR}/sys"
     mount --bind /dev "${ROOTFS_DIR}/dev"
     mount -t devpts devpts "${ROOTFS_DIR}/dev/pts"
 
+    log "安装软件包..."
     dnf install -y \
         --installroot="${ROOTFS_DIR}" \
         --forcearch="${ARCH}" \
         --nodocs \
         --allowerasing \
-        ${PACKAGES}
-else
-    echo "错误: base.list 文件不存在 (${BASE_LIST})"
-    exit 1
-fi
+        ${packages}
 
-echo "软件包安装完成"
+    log "软件包安装完成"
+}
 
-# 配置基本系统
-echo "配置基本系统..."
+configure_system() {
+    log "配置基本系统..."
 
-# 创建 fstab（单一 root 分区）
-cat > "${ROOTFS_DIR}/etc/fstab" << 'EOF'
+    # fstab
+    cat > "${ROOTFS_DIR}/etc/fstab" << 'EOF'
 # /etc/fstab
-# Created by rootfs build script
-# Single root partition
-
 /dev/vda  /  ext4  defaults  0 1
 EOF
 
-# 配置 hostname
-echo "openeuler-riscv64" > "${ROOTFS_DIR}/etc/hostname"
+    # hostname
+    echo "openeuler-riscv64" > "${ROOTFS_DIR}/etc/hostname"
 
-# 配置 hosts
-cat > "${ROOTFS_DIR}/etc/hosts" << 'EOF'
-127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
-::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+    # hosts
+    cat > "${ROOTFS_DIR}/etc/hosts" << 'EOF'
+127.0.0.1   localhost localhost.localdomain
+::1         localhost localhost.localdomain
 EOF
 
-# 配置 sshd
-mkdir -p "${ROOTFS_DIR}/etc/ssh"
-echo "PasswordAuthentication yes" >> "${ROOTFS_DIR}/etc/ssh/sshd_config"
-echo "PermitRootLogin yes" >> "${ROOTFS_DIR}/etc/ssh/sshd_config"
+    # SSH
+    mkdir -p "${ROOTFS_DIR}/etc/ssh"
+    {
+        echo "PasswordAuthentication yes"
+        echo "PermitRootLogin yes"
+    } >> "${ROOTFS_DIR}/etc/ssh/sshd_config"
 
-# 配置 root 密码（默认为 openEuler12#$，请登录后修改）
-echo "root:openEuler12#$" | chroot "${ROOTFS_DIR}" chpasswd
+    # root 密码
+    echo "root:openEuler12#$" | chroot "${ROOTFS_DIR}" chpasswd
 
-# 配置 systemd
-ln -sf /usr/lib/systemd/systemd "${ROOTFS_DIR}/init"
-chroot "${ROOTFS_DIR}" systemctl enable sshd.service 2>/dev/null || true
-chroot "${ROOTFS_DIR}" systemctl enable NetworkManager.service 2>/dev/null || true
+    # systemd
+    ln -sf /usr/lib/systemd/systemd "${ROOTFS_DIR}/init"
+    chroot "${ROOTFS_DIR}" systemctl enable sshd.service 2>/dev/null || true
+    chroot "${ROOTFS_DIR}" systemctl enable NetworkManager.service 2>/dev/null || true
 
-# 配置时间同步
-cat > "${ROOTFS_DIR}/etc/systemd/timesyncd.conf" << 'TIMESYNCEOF'
+    # NTP 时间同步
+    cat > "${ROOTFS_DIR}/etc/systemd/timesyncd.conf" << 'EOF'
 [Time]
 NTP=ntp.aliyun.com ntp.tencent.com
-FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org
-TIMESYNCEOF
+FallbackNTP=0.pool.ntp.org 1.pool.ntp.org
+EOF
 
-echo "基本系统配置完成"
+    log "基本系统配置完成"
+}
 
-# 配置代理环境变量（用户登录后自动加载）
-echo "配置代理环境变量..."
-cat > "${ROOTFS_DIR}/etc/profile.d/proxy.sh" << 'PROXYEOF'
+configure_network() {
+    log "配置代理和网络..."
+
+    # 代理配置
+    cat > "${ROOTFS_DIR}/etc/profile.d/proxy.sh" << 'EOF'
 export https_proxy=http://10.200.2.1:8586
 export http_proxy=http://10.200.2.1:8586
 export all_proxy=socks5://10.200.2.1:8585
-PROXYEOF
-chmod +x "${ROOTFS_DIR}/etc/profile.d/proxy.sh"
+EOF
+    chmod +x "${ROOTFS_DIR}/etc/profile.d/proxy.sh"
 
-echo "代理配置完成（用户登录后自动加载）"
+    # 下载 stream.c 基准测试工具
+    log "下载 stream.c..."
+    mkdir -p "${ROOTFS_DIR}/root"
+    wget -q -O "${ROOTFS_DIR}/root/stream.c" \
+        https://www.cs.virginia.edu/stream/FTP/Code/stream.c || \
+        log "警告: stream.c 下载失败，跳过"
 
-# 下载 stream.c 文件
-echo "下载 stream.c 文件到 /root/..."
-wget -O /root/stream.c https://www.cs.virginia.edu/stream/FTP/Code/stream.c
+    log "网络和代理配置完成"
+}
 
-echo "文件下载完成"
+cleanup_rootfs() {
+    log "清理包管理器缓存..."
+    rm -rf "${ROOTFS_DIR}/var/cache/dnf"
+    rm -rf "${ROOTFS_DIR}/var/lib/dnf"
+    rm -f "${ROOTFS_DIR}/var/log/yum.log"
+    rm -f "${ROOTFS_DIR}/var/log/dnf.rpm.log"
 
-# 清理 rpm 数据
-rm -rf "${ROOTFS_DIR}/var/cache/dnf"
-rm -rf "${ROOTFS_DIR}/var/lib/dnf"
-rm -rf "${ROOTFS_DIR}/var/log/yum.log"
-rm -rf "${ROOTFS_DIR}/var/log/dnf.rpm.log"
+    # 卸载虚拟文件系统
+    cleanup_mounts
+}
 
-# 卸载虚拟文件系统
-echo "卸载虚拟文件系统..."
-umount "${ROOTFS_DIR}/dev/pts" || true
-umount "${ROOTFS_DIR}/dev" || true
-umount "${ROOTFS_DIR}/sys" || true
-umount "${ROOTFS_DIR}/proc" || true
+create_image() {
+    log_section "创建 ext4 镜像"
 
-# 创建 ext4 镜像
-echo "创建 ext4 文件系统镜像..."
-ROOTFS_SIZE=$(du -sm "${ROOTFS_DIR}" | cut -f1)
-IMG_SIZE=$((ROOTFS_SIZE + 2048))  # 预留 2GB 空间
+    local rootfs_size
+    rootfs_size=$(du -sm "${ROOTFS_DIR}" | cut -f1)
+    local img_size=$((rootfs_size + EXTRA_SPACE_MB))
 
-echo "rootfs 实际大小: ${ROOTFS_SIZE}MB"
-echo "镜像总大小: ${IMG_SIZE}MB (预留 2GB)"
+    log "rootfs 大小: ${rootfs_size}MB, 镜像大小: ${img_size}MB (含 ${EXTRA_SPACE_MB}MB 预留)"
 
-TEMP_IMG="/tmp/rootfs_temp.img"
-dd if=/dev/zero of="${TEMP_IMG}" bs=1M count="${IMG_SIZE}" 2>/dev/null
-mkfs.ext4 -F "${TEMP_IMG}" 2>/dev/null
+    TEMP_IMG=$(mktemp /tmp/rootfs-XXXXXX.img)
+    TEMP_MOUNT_DIR=$(mktemp -d /tmp/rootfs-mount-XXXX)
 
-# 挂载并复制文件
-MOUNT_DIR="/tmp/rootfs_mount"
-mkdir -p "${MOUNT_DIR}"
-mount -o loop "${TEMP_IMG}" "${MOUNT_DIR}"
+    dd if=/dev/zero of="${TEMP_IMG}" bs=1M count="${img_size}" status=none
+    mkfs.ext4 -F "${TEMP_IMG}" >/dev/null
 
-cp -a "${ROOTFS_DIR}/" "${MOUNT_DIR}/"
+    mount -o loop "${TEMP_IMG}" "${TEMP_MOUNT_DIR}"
+    cp -a "${ROOTFS_DIR}/." "${TEMP_MOUNT_DIR}/"
+    sync
 
-umount "${MOUNT_DIR}"
-rm -rf "${MOUNT_DIR}"
+    umount "${TEMP_MOUNT_DIR}"
+    rmdir "${TEMP_MOUNT_DIR}"
+    TEMP_MOUNT_DIR=""
 
-# 使用 zst 压缩镜像
-echo "使用 zst 压缩镜像..."
-zstd -f "${TEMP_IMG}" -o "${ROOTFS_IMG}"
-rm -f "${TEMP_IMG}"
+    # zstd 压缩
+    log "压缩镜像 (zstd)..."
+    zstd -f "${TEMP_IMG}" -o "${ROOTFS_IMG}"
 
-echo "img.zst 镜像创建完成: ${ROOTFS_IMG}"
+    log "镜像创建完成: ${ROOTFS_IMG}"
+}
 
-# 打包 tar.gz
-echo "打包 rootfs..."
-tar -czf "${ROOTFS_TARBALL}" -C "${ROOTFS_DIR}" .
+create_tarball() {
+    log_section "创建 tar.gz 压缩包"
 
-echo "tar.gz 打包完成: ${ROOTFS_TARBALL}"
+    tar -czf "${ROOTFS_TARBALL}" -C "${ROOTFS_DIR}" .
 
-# 显示文件信息
-echo "========================================="
-echo "构建完成！"
-echo "========================================="
-echo "img.zst 镜像: ${ROOTFS_IMG}"
-du -h "${ROOTFS_IMG}"
-echo ""
-echo "tar.gz 包: ${ROOTFS_TARBALL}"
-du -h "${ROOTFS_TARBALL}"
-echo "========================================="
+    log "压缩包创建完成: ${ROOTFS_TARBALL}"
+}
+
+show_summary() {
+    log_section "构建完成！"
+    log "镜像:   ${ROOTFS_IMG}"
+    log "压缩包: ${ROOTFS_TARBALL}"
+    echo ""
+    du -sh "${ROOTFS_IMG}" "${ROOTFS_TARBALL}"
+    echo "========================================="
+}
+
+# ============================================================================
+# 主流程
+# ============================================================================
+
+main() {
+    detect_environment
+    check_requirements
+
+    log_section "openEuler RISC-V Rootfs 构建"
+    log "模式: ${ENV_MODE}"
+    log "架构: ${ARCH}"
+    log "输出: ${WORKSPACE}"
+
+    setup_directories
+    install_packages
+    configure_system
+    configure_network
+    cleanup_rootfs
+    create_image
+    create_tarball
+    show_summary
+}
+
+main "$@"

@@ -60,3 +60,21 @@ jobs:
         name: openeuler-rootfs.tar.gz
         path: output/*.tar.gz
         retention-days: 30
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: latest
+        files: |
+          output/*.zst
+          output/*.tar.gz
+        overwrite: true
+        prerelease: true
+        body: |
+          自动构建的 openEuler RISC-V rootfs 镜像
+          
+          下载：
+          - `openeuler-rootfs.img.zst` - zstd 压缩的 ext4 镜像
+          - `openeuler-rootfs.tar.gz` - tar.gz 压缩包
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
