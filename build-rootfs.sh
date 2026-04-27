@@ -244,6 +244,7 @@ create_image() {
     log "压缩镜像 (zstd)..."
     zstd -f "${TEMP_IMG}" -o "${ROOTFS_IMG}"
 
+    chmod 644 "${ROOTFS_IMG}"
     log "镜像创建完成: ${ROOTFS_IMG}"
 }
 
@@ -252,6 +253,7 @@ create_tarball() {
 
     tar -czf "${ROOTFS_TARBALL}" -C "${ROOTFS_DIR}" .
 
+    chmod 644 "${ROOTFS_TARBALL}"
     log "压缩包创建完成: ${ROOTFS_TARBALL}"
 }
 
