@@ -11,8 +11,8 @@ cat << 'EOF'
 
 📋 支持的发行版
 ─────────────────────────────────────────────────────────────────────
-  openeuler  - openEuler 24.03 SP2 RISC-V (RVA20)
-  openruyi   - openRuyi RISC-V64
+  openeuler  - openEuler 24.03 SP2 RISC-V64 (RVA20)
+  openruyi   - openRuyi RISC-V64 (RVA23)
 
 📋 前提条件
 ─────────────────────────────────────────────────────────────────────

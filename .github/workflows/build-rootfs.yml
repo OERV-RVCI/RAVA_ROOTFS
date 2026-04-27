@@ -1,4 +1,4 @@
-name: Build openEuler RISC-V Rootfs
+name: Build RISC-V64 Rootfs
 
 on:
   push:
@@ -8,9 +8,15 @@ on:
   workflow_dispatch:
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        distro:
+          - name: openeuler
+            dockerfile: Dockerfile
+          - name: openruyi
+            dockerfile: Dockerfile.openruyi
 
     steps:
     - uses: actions/checkout@v4
@@ -27,10 +33,10 @@ jobs:
     - name: Create a new builder instance
       run: docker buildx create --use --name insecure-builder --buildkitd-flags '--allow-insecure-entitlement security.insecure'
 
-    - name: Build Docker image
-      run: docker buildx build --load -t rootfs-builder .
+    - name: Build Docker image for ${{ matrix.distro.name }}
+      run: docker buildx build --load -f ${{ matrix.distro.dockerfile }} -t rootfs-builder-${{ matrix.distro.name }} .
 
-    - name: Build rootfs
+    - name: Build ${{ matrix.distro.name }} rootfs
       run: |
         mkdir -p output
         docker run --rm --privileged \
@@ -39,8 +45,8 @@ jobs:
           -v /dev/pts:/dev/pts \
           -v /sys:/sys \
           -v /proc:/proc \
-          rootfs-builder \
-          bash /workspace/build-rootfs.sh
+          rootfs-builder-${{ matrix.distro.name }} \
+          bash /workspace/build-rootfs.sh ${{ matrix.distro.name }}
 
     - name: Display build artifacts
       run: |
@@ -50,31 +56,45 @@ jobs:
     - name: Upload zst artifact
       uses: actions/upload-artifact@v4
       with:
-        name: openeuler-rootfs.img.zst
+        name: ${{ matrix.distro.name }}-rootfs.img.zst
         path: output/*.zst
         retention-days: 30
 
     - name: Upload tar.gz artifact
       uses: actions/upload-artifact@v4
       with:
-        name: openeuler-rootfs.tar.gz
+        name: ${{ matrix.distro.name }}-rootfs.tar.gz
         path: output/*.tar.gz
         retention-days: 30
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: List artifacts
+      run: find artifacts -type f -name "*.zst" -o -name "*.tar.gz"
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
         tag_name: latest
         files: |
-          output/*.zst
-          output/*.tar.gz
+          artifacts/**/**/*.zst
+          artifacts/**/**/*.tar.gz
         overwrite: true
         prerelease: true
         body: |
-          自动构建的 openEuler RISC-V rootfs 镜像
+          自动构建的 RISC-V64 rootfs 镜像
           
           下载：
-          - `openeuler-rootfs.img.zst` - zstd 压缩的 ext4 镜像
-          - `openeuler-rootfs.tar.gz` - tar.gz 压缩包
+          - `openeuler-rootfs.img.zst` - openEuler RISC-V64 (RVA20) zstd 压缩镜像
+          - `openeuler-rootfs.tar.gz` - openEuler RISC-V64 (RVA20) tar.gz 压缩包
+          - `openruyi-rootfs.img.zst` - openRuyi RISC-V64 (RVA23) zstd 压缩镜像
+          - `openruyi-rootfs.tar.gz` - openRuyi RISC-V64 (RVA23) tar.gz 压缩包
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

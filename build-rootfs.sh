@@ -8,8 +8,8 @@
 #   本地模式: sudo bash build-rootfs.sh [distro]
 #
 # 发行版参数:
-#   openeuler  - openEuler 24.03 SP2 RISC-V (默认)
-#   openruyi   - openRuyi RVA23 RISC-V64
+#   openeuler  - openEuler 24.03 SP2 RISC-V64 (RVA20) (默认)
+#   openruyi   - openRuyi RISC-V64 (RVA23)
 #
 
 set -euo pipefail

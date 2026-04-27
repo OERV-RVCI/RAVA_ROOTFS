@@ -1,6 +1,6 @@
 # Rootfs 构建
 
-自动化构建 RISC-V 架构 rootfs 的流水线和脚本。
+自动化构建 RISC-V64 架构 rootfs 的流水线和脚本。
 
 ## 支持的发行版
 
