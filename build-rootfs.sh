@@ -135,6 +135,17 @@ install_packages() {
             "${INSTALL_TARGET}"
     fi
 
+    # 安装额外软件包
+    if [ -n "${EXTRA_PACKAGES:-}" ]; then
+        log "安装额外软件包: ${EXTRA_PACKAGES}"
+        dnf install -y \
+            --installroot="${ROOTFS_DIR}" \
+            --forcearch="${ARCH}" \
+            --nodocs \
+            ${DNF_OPTS:-} \
+            ${EXTRA_PACKAGES}
+    fi
+
     log "软件包安装完成"
 }
 
@@ -165,11 +176,15 @@ EOF
     chroot "${ROOTFS_DIR}" systemctl enable sshd.service 2>/dev/null || true
     chroot "${ROOTFS_DIR}" systemctl enable NetworkManager.service 2>/dev/null || true
 
-    cat > "${ROOTFS_DIR}/etc/systemd/timesyncd.conf" << EOF
+    # 配置 NTP 时间同步（如果 systemd-timesyncd 存在）
+    if [ -d "${ROOTFS_DIR}/etc/systemd" ]; then
+        mkdir -p "${ROOTFS_DIR}/etc/systemd"
+        cat > "${ROOTFS_DIR}/etc/systemd/timesyncd.conf" << EOF
 [Time]
 NTP=${NTP_SERVERS}
 FallbackNTP=${FALLBACK_NTP}
 EOF
+    fi
 
     log "基本系统配置完成"
 }
