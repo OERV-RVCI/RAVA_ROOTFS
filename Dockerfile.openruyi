@@ -4,7 +4,6 @@ FROM git.openruyi.cn/openruyi/creek-x86-64:latest
 RUN dnf makecache \
     && dnf install -y \
         dnf \
-        dnf-plugins-core \
         e2fsprogs \
         util-linux \
         zstd \

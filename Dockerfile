@@ -4,7 +4,6 @@ FROM openeuler/openeuler:24.03-lts-sp2
 RUN dnf makecache \
     && dnf install -y \
         dnf \
-        dnf-plugins-core \
         e2fsprogs \
         util-linux \
         zstd \
