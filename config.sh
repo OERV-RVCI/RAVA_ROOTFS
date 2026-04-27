@@ -26,6 +26,8 @@ case "${DISTRO}" in
         PROXY_HTTP="http://10.200.2.1:8586"
         PROXY_HTTPS="http://10.200.2.1:8586"
         PROXY_SOCKS="socks5://10.200.2.1:8585"
+        INSTALL_MODE="group"
+        INSTALL_TARGET="Minimal Install"
         ;;
     openruyi)
         DISTRO_NAME="openRuyi"
@@ -44,6 +46,8 @@ case "${DISTRO}" in
         PROXY_HTTP="http://10.200.2.1:8586"
         PROXY_HTTPS="http://10.200.2.1:8586"
         PROXY_SOCKS="socks5://10.200.2.1:8585"
+        INSTALL_MODE="package"
+        INSTALL_TARGET="openruyi-minimal"
         ;;
     *)
         echo "错误: 不支持的发行版 '${DISTRO}'"
@@ -56,3 +60,4 @@ esac
 export DISTRO DISTRO_NAME DISTRO_VERSION ARCH PROFILE CONTAINER_IMAGE
 export REPO_BASE REPO_URL PACKAGE_MANAGER HOSTNAME ROOT_PASSWORD
 export NTP_SERVERS FALLBACK_NTP PROXY_HTTP PROXY_HTTPS PROXY_SOCKS
+export INSTALL_MODE INSTALL_TARGET

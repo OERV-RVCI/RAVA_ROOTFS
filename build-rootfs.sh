@@ -31,11 +31,9 @@ detect_environment() {
     if [ -f "/.dockerenv" ]; then
         ENV_MODE="container"
         WORKSPACE="${OUTPUT_DIR:-/output}"
-        BASE_LIST="/workspace/base.list"
     else
         ENV_MODE="local"
         WORKSPACE="$(pwd)"
-        BASE_LIST="${WORKSPACE}/base.list"
     fi
 
     ROOTFS_DIR="${WORKSPACE}/rootfs"
@@ -114,17 +112,7 @@ setup_directories() {
 }
 
 install_packages() {
-    if [ ! -f "${BASE_LIST}" ]; then
-        log "错误: base.list 不存在 (${BASE_LIST})"
-        exit 1
-    fi
-
-    local packages
-    packages=$(grep -v '^\s*#' "${BASE_LIST}" | grep -v '^\s*$' | tr '\n' ' ')
-    local pkg_count
-    pkg_count=$(grep -v '^\s*#' "${BASE_LIST}" | grep -v '^\s*$' | wc -l)
-
-    log "从 base.list 读取 ${pkg_count} 个软件包..."
+    log "安装目标: ${INSTALL_TARGET} (模式: ${INSTALL_MODE})"
 
     mount -t proc proc "${ROOTFS_DIR}/proc"
     mount -t sysfs sysfs "${ROOTFS_DIR}/sys"
@@ -132,12 +120,19 @@ install_packages() {
     mount -t devpts devpts "${ROOTFS_DIR}/dev/pts"
 
     log "安装软件包..."
-    dnf install -y \
-        --installroot="${ROOTFS_DIR}" \
-        --forcearch="${ARCH}" \
-        --nodocs \
-        --allowerasing \
-        ${packages}
+    if [ "${INSTALL_MODE}" = "group" ]; then
+        dnf group install -y \
+            --installroot="${ROOTFS_DIR}" \
+            --forcearch="${ARCH}" \
+            --nodocs \
+            "${INSTALL_TARGET}"
+    else
+        dnf install -y \
+            --installroot="${ROOTFS_DIR}" \
+            --forcearch="${ARCH}" \
+            --nodocs \
+            "${INSTALL_TARGET}"
+    fi
 
     log "软件包安装完成"
 }
