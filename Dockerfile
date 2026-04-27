@@ -12,6 +12,7 @@ RUN dnf makecache \
     && dnf clean all
 
 COPY base.list /workspace/
+COPY config.sh /workspace/
 COPY build-rootfs.sh /workspace/
 RUN chmod +x /workspace/build-rootfs.sh
 
