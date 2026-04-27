@@ -131,6 +131,7 @@ install_packages() {
             --installroot="${ROOTFS_DIR}" \
             --forcearch="${ARCH}" \
             --nodocs \
+            ${DNF_OPTS:-} \
             "${INSTALL_TARGET}"
     fi
 
