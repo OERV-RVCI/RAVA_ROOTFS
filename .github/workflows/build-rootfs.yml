@@ -1,5 +1,8 @@
 name: Build RISC-V64 Rootfs
 
+permissions:
+  contents: write
+
 on:
   push:
     branches:
