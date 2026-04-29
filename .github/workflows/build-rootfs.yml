@@ -82,7 +82,36 @@ jobs:
     - name: List artifacts
       run: find artifacts -type f -name "*.zst" -o -name "*.tar.gz"
 
-    - name: Create Release
+    - name: Generate release tag
+      id: tag
+      run: |
+        # Generate timestamp-based tag
+        release_tag="v$(date +%Y%m%d_%H%M%S)"
+        echo "release_tag=${release_tag}" >> $GITHUB_OUTPUT
+        echo "release_date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
+
+    - name: Create Timestamped Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ steps.tag.outputs.release_tag }}
+        files: |
+          artifacts/**/**/*.zst
+          artifacts/**/**/*.tar.gz
+        prerelease: false
+        body: |
+          自动构建的 RISC-V64 rootfs 镜像
+          
+          构建时间: ${{ steps.tag.outputs.release_date }}
+          
+          下载：
+          - `openeuler-rootfs.img.zst` - openEuler RISC-V64 (RVA20) zstd 压缩镜像
+          - `openeuler-rootfs.tar.gz` - openEuler RISC-V64 (RVA20) tar.gz 压缩包
+          - `openruyi-rootfs.img.zst` - openRuyi RISC-V64 (RVA23) zstd 压缩镜像
+          - `openruyi-rootfs.tar.gz` - openRuyi RISC-V64 (RVA23) tar.gz 压缩包
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Update Latest Release
       uses: softprops/action-gh-release@v2
       with:
         tag_name: latest
@@ -92,7 +121,10 @@ jobs:
         overwrite: true
         prerelease: true
         body: |
-          自动构建的 RISC-V64 rootfs 镜像
+          最新自动构建的 RISC-V64 rootfs 镜像
+          
+          此 release 会自动更新为最新版本。
+          历史版本请查看其他带时间戳的 release。
           
           下载：
           - `openeuler-rootfs.img.zst` - openEuler RISC-V64 (RVA20) zstd 压缩镜像
