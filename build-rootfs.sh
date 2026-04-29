@@ -125,6 +125,7 @@ install_packages() {
             --installroot="${ROOTFS_DIR}" \
             --forcearch="${ARCH}" \
             --nodocs \
+            --exclude=kernel* \
             "${INSTALL_TARGET}"
     else
         dnf install -y \
@@ -132,6 +133,7 @@ install_packages() {
             --forcearch="${ARCH}" \
             --nodocs \
             ${DNF_OPTS:-} \
+            --exclude=kernel* \
             "${INSTALL_TARGET}"
     fi
 
