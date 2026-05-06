@@ -225,9 +225,9 @@ create_image() {
 
     local rootfs_size
     rootfs_size=$(du -sm "${ROOTFS_DIR}" | cut -f1)
-    local img_size=$((rootfs_size + 2048))
+    local img_size=$((rootfs_size + 5120))
 
-    log "rootfs 大小: ${rootfs_size}MB, 镜像大小: ${img_size}MB (含 2GB 预留)"
+    log "rootfs 大小: ${rootfs_size}MB, 镜像大小: ${img_size}MB (含 5GB 预留)"
 
     TEMP_IMG=$(mktemp /tmp/rootfs-XXXXXX.img)
     TEMP_MOUNT_DIR=$(mktemp -d /tmp/rootfs-mount-XXXX)
