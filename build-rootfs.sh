@@ -192,14 +192,15 @@ EOF
 }
 
 configure_network() {
-    log "配置代理和网络..."
+    log "配置网络..."
 
-    cat > "${ROOTFS_DIR}/etc/profile.d/proxy.sh" << EOF
-export https_proxy=${PROXY_HTTPS}
-export http_proxy=${PROXY_HTTP}
-export all_proxy=${PROXY_SOCKS}
-EOF
-    chmod +x "${ROOTFS_DIR}/etc/profile.d/proxy.sh"
+    # 代理配置已禁用
+    # cat > "${ROOTFS_DIR}/etc/profile.d/proxy.sh" << EOF
+    # export https_proxy=${PROXY_HTTPS}
+    # export http_proxy=${PROXY_HTTP}
+    # export all_proxy=${PROXY_SOCKS}
+    # EOF
+    # chmod +x "${ROOTFS_DIR}/etc/profile.d/proxy.sh"
 
     log "下载 stream.c..."
     mkdir -p "${ROOTFS_DIR}/root"
@@ -207,7 +208,7 @@ EOF
         https://www.cs.virginia.edu/stream/FTP/Code/stream.c || \
         log "警告: stream.c 下载失败，跳过"
 
-    log "网络和代理配置完成"
+    log "网络配置完成"
 }
 
 cleanup_rootfs() {
