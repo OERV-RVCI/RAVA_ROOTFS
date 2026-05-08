@@ -146,6 +146,14 @@ install_packages() {
             --nodocs \
             ${DNF_OPTS:-} \
             ${EXTRA_PACKAGES}
+
+        # 替换 libudev-zero 为 systemd-udev
+        log "替换 libudev-zero 为 systemd-udev..."
+        dnf swap -y \
+            --installroot="${ROOTFS_DIR}" \
+            --forcearch="${ARCH}" \
+            ${DNF_OPTS:-} \
+            libudev-zero systemd-udev
     fi
 
     log "软件包安装完成"
@@ -177,9 +185,11 @@ EOF
         echo "PermitRootLogin yes"
     } >> "${ROOTFS_DIR}/etc/ssh/sshd_config"
 
-    echo "root:${ROOT_PASSWORD}" | chroot "${ROOTFS_DIR}" chpasswd
+echo "root:${ROOT_PASSWORD}" | chroot "${ROOTFS_DIR}" chpasswd
 
-    ln -sf /usr/lib/systemd/systemd "${ROOTFS_DIR}/init"
+    # 创建 systemd-resolved 用户
+    chroot "${ROOTFS_DIR}" useradd -r -s /sbin/nologin systemd-resolve 2>/dev/null || true
+
     chroot "${ROOTFS_DIR}" systemctl enable sshd.service 2>/dev/null || true
     chroot "${ROOTFS_DIR}" systemctl enable NetworkManager.service 2>/dev/null || true
 
