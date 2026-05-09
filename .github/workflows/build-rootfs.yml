@@ -97,10 +97,9 @@ jobs:
       run: |
         # Get the most recent release tag before current commit
         current_sha=$(git rev-parse HEAD)
-        all_tags=$(git tag --sort=-v:refname | grep -E '^v[0-9]{8}_[0-9]{6}$' | head -20)
 
         prev_tag=""
-        for tag in $all_tags; do
+        for tag in $(git tag --sort=-v:refname | grep -E '^v[0-9]{8}_[0-9]{6}$' | head -20); do
           tag_sha=$(git rev-parse "$tag" 2>/dev/null)
           if [ "$tag_sha" != "$current_sha" ]; then
             prev_tag="$tag"
