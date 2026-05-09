@@ -107,14 +107,17 @@ jobs:
           fi
         done
 
+        commits=""
         if [ -n "$prev_tag" ]; then
-          commits=$(git log --oneline "$prev_tag"..HEAD)
-        else
-          commits=""
+          commits=$(git log --oneline "$prev_tag"..HEAD 2>/dev/null || echo "")
         fi
-        echo "commits<<EOF" >> $GITHUB_OUTPUT
-        echo "$commits" >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
+
+        # Output using delimiter syntax
+        {
+          echo "commits<<EOF"
+          echo "$commits"
+          echo "EOF"
+        } >> $GITHUB_OUTPUT
 
     - name: Create Timestamped Release
       uses: softprops/action-gh-release@v2
