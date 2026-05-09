@@ -209,14 +209,6 @@ EOF
 configure_network() {
     log "配置网络..."
 
-    # 代理配置已禁用
-    # cat > "${ROOTFS_DIR}/etc/profile.d/proxy.sh" << EOF
-    # export https_proxy=${PROXY_HTTPS}
-    # export http_proxy=${PROXY_HTTP}
-    # export all_proxy=${PROXY_SOCKS}
-    # EOF
-    # chmod +x "${ROOTFS_DIR}/etc/profile.d/proxy.sh"
-
     log "下载 stream.c..."
     mkdir -p "${ROOTFS_DIR}/root"
     wget -q -O "${ROOTFS_DIR}/root/stream.c" \
@@ -268,6 +260,14 @@ create_image() {
 
 create_tarball() {
     log_section "创建 tar.gz 压缩包"
+
+    # 为 tar.gz 添加代理配置
+    cat > "${ROOTFS_DIR}/etc/profile.d/proxy.sh" << EOF
+export https_proxy=${PROXY_HTTPS}
+export http_proxy=${PROXY_HTTP}
+export all_proxy=${PROXY_SOCKS}
+EOF
+    chmod +x "${ROOTFS_DIR}/etc/profile.d/proxy.sh"
 
     tar -czf "${ROOTFS_TARBALL}" -C "${ROOTFS_DIR}" .
 

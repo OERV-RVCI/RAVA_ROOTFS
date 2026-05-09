@@ -23,9 +23,9 @@ case "${DISTRO}" in
         ROOT_PASSWORD="openEuler12#\$"
         NTP_SERVERS="ntp.aliyun.com ntp.tencent.com"
         FALLBACK_NTP="0.pool.ntp.org 1.pool.ntp.org"
-        # PROXY_HTTP="http://10.200.2.1:8586"
-        # PROXY_HTTPS="http://10.200.2.1:8586"
-        # PROXY_SOCKS="socks5://10.200.2.1:8585"
+        PROXY_HTTP="http://10.200.1.1:8888"
+        PROXY_HTTPS="http://10.200.1.1:8888"
+        PROXY_SOCKS="socks5://10.200.1.1:8585"
         INSTALL_MODE="group"
         INSTALL_TARGET="Minimal Install"
         EXTRA_PACKAGES=""
@@ -44,9 +44,9 @@ case "${DISTRO}" in
         ROOT_PASSWORD="openEuler12#\$"
         NTP_SERVERS="ntp.aliyun.com ntp.tencent.com"
         FALLBACK_NTP="0.pool.ntp.org 1.pool.ntp.org"
-        # PROXY_HTTP="http://10.200.2.1:8586"
-        # PROXY_HTTPS="http://10.200.2.1:8586"
-        # PROXY_SOCKS="socks5://10.200.2.1:8585"
+        PROXY_HTTP="http://10.200.1.1:8888"
+        PROXY_HTTPS="http://10.200.1.1:8888"
+        PROXY_SOCKS="socks5://10.200.1.1:8585"
         INSTALL_MODE="package"
         INSTALL_TARGET="openruyi-minimal"
         DNF_OPTS="--use-host-config"
@@ -62,5 +62,5 @@ esac
 # 导出配置
 export DISTRO DISTRO_NAME DISTRO_VERSION ARCH PROFILE CONTAINER_IMAGE
 export REPO_BASE REPO_URL PACKAGE_MANAGER HOSTNAME ROOT_PASSWORD
-export NTP_SERVERS FALLBACK_NTP
+export NTP_SERVERS FALLBACK_NTP PROXY_HTTP PROXY_HTTPS PROXY_SOCKS
 export INSTALL_MODE INSTALL_TARGET DNF_OPTS EXTRA_PACKAGES
