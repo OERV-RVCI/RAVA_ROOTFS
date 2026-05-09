@@ -93,10 +93,21 @@ jobs:
     - name: Get commit changes
       id: changes
       run: |
-        # Get commits since last release tag
-        last_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-        if [ -n "$last_tag" ]; then
-          commits=$(git log --oneline "$last_tag"..HEAD)
+        # Get the most recent release tag before current commit
+        current_sha=$(git rev-parse HEAD)
+        all_tags=$(git tag --sort=-v:refname | grep -E '^v[0-9]{8}_[0-9]{6}$' | head -20)
+
+        prev_tag=""
+        for tag in $all_tags; do
+          tag_sha=$(git rev-parse "$tag" 2>/dev/null)
+          if [ "$tag_sha" != "$current_sha" ]; then
+            prev_tag="$tag"
+            break
+          fi
+        done
+
+        if [ -n "$prev_tag" ]; then
+          commits=$(git log --oneline "$prev_tag"..HEAD)
         else
           commits=""
         fi
