@@ -50,7 +50,7 @@ case "${DISTRO}" in
         INSTALL_MODE="package"
         INSTALL_TARGET="openruyi-minimal"
         DNF_OPTS="--use-host-config"
-        EXTRA_PACKAGES="systemd-timesyncd systemd libseccomp"
+        EXTRA_PACKAGES="systemd-timesyncd systemd libseccomp NetworkManager"
         ;;
     *)
         echo "错误: 不支持的发行版 '${DISTRO}'"
