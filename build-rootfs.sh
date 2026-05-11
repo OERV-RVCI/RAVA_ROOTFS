@@ -192,10 +192,10 @@ echo "root:${ROOT_PASSWORD}" | chroot "${ROOTFS_DIR}" chpasswd
     # openruyi 需要创建 systemd-resolve 用户
     if [ "${DISTRO}" = "openruyi" ]; then
         chroot "${ROOTFS_DIR}" useradd -r -s /sbin/nologin systemd-resolve 2>/dev/null || true
+        chroot "${ROOTFS_DIR}" systemctl enable NetworkManager.service 2>/dev/null || true
     fi
 
     # chroot "${ROOTFS_DIR}" systemctl enable sshd.service 2>/dev/null || true
-    # chroot "${ROOTFS_DIR}" systemctl enable NetworkManager.service 2>/dev/null || true
 
     # 配置 NTP 时间同步（如果 systemd-timesyncd 存在）
     if [ -d "${ROOTFS_DIR}/etc/systemd" ]; then
