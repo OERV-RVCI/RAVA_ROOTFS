@@ -126,6 +126,7 @@ install_packages() {
             --forcearch="${ARCH}" \
             --nodocs \
             --exclude=kernel* \
+            --exclude=NetworkManager-config-server \
             "${INSTALL_TARGET}"
     else
         dnf install -y \
@@ -144,6 +145,7 @@ install_packages() {
             --installroot="${ROOTFS_DIR}" \
             --forcearch="${ARCH}" \
             --nodocs \
+            --exclude=NetworkManager-config-server \
             ${DNF_OPTS:-} \
             ${EXTRA_PACKAGES}
 
