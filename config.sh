@@ -28,7 +28,7 @@ case "${DISTRO}" in
         PROXY_SOCKS="socks5://10.200.1.1:8585"
         INSTALL_MODE="group"
         INSTALL_TARGET="Minimal Install"
-        EXTRA_PACKAGES=""
+        EXTRA_PACKAGES="systemd-timesyncd"
         ;;
     openruyi)
         DISTRO_NAME="openRuyi"

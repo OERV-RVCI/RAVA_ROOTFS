@@ -145,17 +145,18 @@ install_packages() {
             --installroot="${ROOTFS_DIR}" \
             --forcearch="${ARCH}" \
             --nodocs \
-            --exclude=NetworkManager-config-server \
             ${DNF_OPTS:-} \
             ${EXTRA_PACKAGES}
 
-        # 替换 libudev-zero 为 systemd-udev
-        log "替换 libudev-zero 为 systemd-udev..."
-        dnf swap -y \
-            --installroot="${ROOTFS_DIR}" \
-            --forcearch="${ARCH}" \
-            ${DNF_OPTS:-} \
-            libudev-zero systemd-udev
+        # 仅 openruyi 需要替换 libudev-zero 为 systemd-udev
+        if [ "${DISTRO}" = "openruyi" ]; then
+            log "替换 libudev-zero 为 systemd-udev..."
+            dnf swap -y \
+                --installroot="${ROOTFS_DIR}" \
+                --forcearch="${ARCH}" \
+                ${DNF_OPTS:-} \
+                libudev-zero systemd-udev
+        fi
     fi
 
     log "软件包安装完成"
@@ -205,6 +206,8 @@ echo "root:${ROOT_PASSWORD}" | chroot "${ROOTFS_DIR}" chpasswd
 NTP=${NTP_SERVERS}
 FallbackNTP=${FALLBACK_NTP}
 EOF
+        chroot "${ROOTFS_DIR}" timedatectl set-ntp true 2>/dev/null || true
+        chroot "${ROOTFS_DIR}" systemctl enable systemd-timesyncd.service 2>/dev/null || true
     fi
 
     log "基本系统配置完成"
