@@ -40,7 +40,7 @@ case "${DISTRO}" in
         REPO_BASE="https://boat.openruyi.cn"
         REPO_URL="${REPO_BASE}/unstable/rva23"
         PACKAGE_MANAGER="dnf"
-        HOSTNAME="openruyi-riscv64"
+        HOSTNAME="openeuler-riscv64"
         ROOT_PASSWORD="openEuler12#\$"
         NTP_SERVERS="ntp.aliyun.com ntp.tencent.com"
         FALLBACK_NTP="0.pool.ntp.org 1.pool.ntp.org"

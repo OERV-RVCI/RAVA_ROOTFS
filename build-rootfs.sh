@@ -258,13 +258,17 @@ create_image() {
 create_tarball() {
     log_section "创建 tar.gz 压缩包"
 
-    # 为 tar.gz 添加代理配置
+    # 为 tar.gz 添加代理配置和 DNS
     cat > "${ROOTFS_DIR}/etc/profile.d/proxy.sh" << EOF
 export https_proxy=${PROXY_HTTPS}
 export http_proxy=${PROXY_HTTP}
 export all_proxy=${PROXY_SOCKS}
 EOF
     chmod +x "${ROOTFS_DIR}/etc/profile.d/proxy.sh"
+
+    cat > "${ROOTFS_DIR}/etc/resolv.conf" << EOF
+nameserver 223.5.5.5
+EOF
 
     tar -czf "${ROOTFS_TARBALL}" -C "${ROOTFS_DIR}" .
 
