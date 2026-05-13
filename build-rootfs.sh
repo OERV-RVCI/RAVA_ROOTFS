@@ -172,16 +172,6 @@ EOF
 
     echo "${HOSTNAME}" > "${ROOTFS_DIR}/etc/hostname"
 
-    cat > "${ROOTFS_DIR}/etc/hosts" << 'EOF'
-127.0.0.1   localhost localhost.localdomain
-::1         localhost localhost.localdomain
-EOF
-
-    cat > "${ROOTFS_DIR}/etc/resolv.conf" << 'EOF'
-nameserver 223.5.5.5
-nameserver 119.29.29.29
-EOF
-
     mkdir -p "${ROOTFS_DIR}/etc/ssh"
     {
         echo "PasswordAuthentication yes"

@@ -77,16 +77,35 @@ sudo bash build-rootfs.sh openruyi
 ```bash
 # 解压镜像
 zstd -d output/openeuler-rootfs.img.zst -o output/openeuler-rootfs.img
+zstd -d output/openruyi-rootfs.img.zst -o output/openruyi-rootfs.img
 
-# 启动（需要内核和 initrd）
+# 启动 openEuler (需要内核 Image)
 qemu-system-riscv64 \
-    -M virt -m 2G -smp 4 \
-    -kernel /path/to/Image \
-    -initrd /path/to/initrd \
-    -device virtio-blk-device,drive=rootfs \
-    -drive if=none,file=output/openeuler-rootfs.img,id=rootfs,format=raw \
-    -append "root=/dev/vda ro console=ttyS0" \
-    -nographic
+    -machine virt -cpu rv64 -nographic \
+    -net nic,model=virtio,macaddr=52:54:00:12:34:58 \
+    -net user \
+    -m 512 \
+    -smp 8 -m 8G \
+    -device virtio-blk-device,drive=hd0,if=none \
+    -drive file=openeuler-rootfs.img,format=raw,id=hd0,if=none \
+    -append "root=/dev/vda rw console=ttyS0 selinux=0" \
+    -device virtio-net-device,netdev=usernet \
+    -netdev user,id=usernet,hostfwd=tcp::16615-:22 \
+    -kernel openeuler/Image
+
+# 启动 openRuyi (需要内核 Image)
+qemu-system-riscv64 \
+    -machine virt -cpu rv64 -nographic \
+    -net nic,model=virtio,macaddr=52:54:00:12:34:59 \
+    -net user \
+    -m 512 \
+    -smp 8 -m 8G -cpu rva23s64 \
+    -device virtio-blk-device,drive=hd0,if=none \
+    -drive file=openruyi-rootfs.img,format=raw,id=hd0,if=none \
+    -append "root=/dev/vda rw console=ttyS0 selinux=0" \
+    -device virtio-net-device,netdev=usernet \
+    -netdev user,id=usernet,hostfwd=tcp::16616-:22 \
+    -kernel openruyi/Image
 ```
 
 ### 真机启动
