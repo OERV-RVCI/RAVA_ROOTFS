@@ -17,7 +17,7 @@ jobs:
       matrix:
         distro:
           - name: openEuler-24.03-LTS-SP3
-            dockerfile: Dockerfile
+            dockerfile: Dockerfile.openEuler-24.03-LTS-SP3
           - name: openEuler-24.03-LTS-SP2
             dockerfile: Dockerfile.openEuler-24.03-LTS-SP2
           - name: openruyi
