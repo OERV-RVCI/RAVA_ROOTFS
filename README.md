@@ -6,7 +6,8 @@
 
 | 发行版 | 架构 | 配置文件 |
 |--------|------|----------|
-| openEuler 24.03 SP2 | riscv64 (RVA20) | `openeuler` (默认) |
+| openEuler 24.03 LTS SP3 | riscv64 (RVA20) | `openEuler-24.03-LTS-SP3` (默认) |
+| openEuler 24.03 LTS SP2 | riscv64 (RVA20) | `openEuler-24.03-LTS-SP2` |
 | openRuyi | riscv64 (RVA23) | `openruyi` |
 
 ## 功能
@@ -41,9 +42,12 @@ RAVA_ROOTFS/
 ### 方式 1：Docker 构建（推荐）
 
 ```bash
-# 构建 openEuler (默认)
+# 构建 openEuler-24.03-LTS-SP3 (默认)
 chmod +x local-build.sh
 ./local-build.sh
+
+# 构建 openEuler-24.03-LTS-SP2
+./local-build.sh openEuler-24.03-LTS-SP2
 
 # 构建 openRuyi
 ./local-build.sh openruyi
@@ -52,8 +56,11 @@ chmod +x local-build.sh
 ### 方式 2：本地直接构建
 
 ```bash
-# openEuler
-sudo bash build-rootfs.sh openeuler
+# openEuler-24.03-LTS-SP3
+sudo bash build-rootfs.sh openEuler-24.03-LTS-SP3
+
+# openEuler-24.03-LTS-SP2
+sudo bash build-rootfs.sh openEuler-24.03-LTS-SP2
 
 # openRuyi
 sudo bash build-rootfs.sh openruyi
@@ -67,7 +74,8 @@ sudo bash build-rootfs.sh openruyi
 
 | 发行版 | 镜像文件 | 压缩包 |
 |--------|----------|--------|
-| openEuler | `openeuler-rootfs.img.zst` | `openeuler-rootfs.tar.gz` |
+| openEuler-24.03-LTS-SP3 | `openEuler-24.03-LTS-SP3-rootfs.img.zst` | `openEuler-24.03-LTS-SP3-rootfs.tar.gz` |
+| openEuler-24.03-LTS-SP2 | `openEuler-24.03-LTS-SP2-rootfs.img.zst` | `openEuler-24.03-LTS-SP2-rootfs.tar.gz` |
 | openRuyi | `openruyi-rootfs.img.zst` | `openruyi-rootfs.tar.gz` |
 
 ## 使用 rootfs
@@ -76,10 +84,11 @@ sudo bash build-rootfs.sh openruyi
 
 ```bash
 # 解压镜像
-zstd -d output/openeuler-rootfs.img.zst -o output/openeuler-rootfs.img
+zstd -d output/openEuler-24.03-LTS-SP3-rootfs.img.zst -o output/openEuler-24.03-LTS-SP3-rootfs.img
+zstd -d output/openEuler-24.03-LTS-SP2-rootfs.img.zst -o output/openEuler-24.03-LTS-SP2-rootfs.img
 zstd -d output/openruyi-rootfs.img.zst -o output/openruyi-rootfs.img
 
-# 启动 openEuler (需要内核 Image)
+# 启动 openEuler-24.03-LTS-SP3 (需要内核 Image)
 qemu-system-riscv64 \
     -machine virt -cpu rv64 -nographic \
     -net nic,model=virtio,macaddr=52:54:00:12:34:58 \
@@ -87,11 +96,25 @@ qemu-system-riscv64 \
     -m 512 \
     -smp 8 -m 8G \
     -device virtio-blk-device,drive=hd0,if=none \
-    -drive file=openeuler-rootfs.img,format=raw,id=hd0,if=none \
+    -drive file=openEuler-24.03-LTS-SP3-rootfs.img,format=raw,id=hd0,if=none \
     -append "root=/dev/vda rw console=ttyS0 selinux=0" \
     -device virtio-net-device,netdev=usernet \
     -netdev user,id=usernet,hostfwd=tcp::16615-:22 \
-    -kernel openeuler/Image
+    -kernel openEuler-24.03-LTS-SP3/Image
+
+# 启动 openEuler-24.03-LTS-SP2 (需要内核 Image)
+qemu-system-riscv64 \
+    -machine virt -cpu rv64 -nographic \
+    -net nic,model=virtio,macaddr=52:54:00:12:34:57 \
+    -net user \
+    -m 512 \
+    -smp 8 -m 8G \
+    -device virtio-blk-device,drive=hd0,if=none \
+    -drive file=openEuler-24.03-LTS-SP2-rootfs.img,format=raw,id=hd0,if=none \
+    -append "root=/dev/vda rw console=ttyS0 selinux=0" \
+    -device virtio-net-device,netdev=usernet \
+    -netdev user,id=usernet,hostfwd=tcp::16614-:22 \
+    -kernel openEuler-24.03-LTS-SP2/Image
 
 # 启动 openRuyi (需要内核 Image)
 qemu-system-riscv64 \
@@ -111,8 +134,8 @@ qemu-system-riscv64 \
 ### 真机启动
 
 ```bash
-zstd -d output/openeuler-rootfs.img.zst -o output/openeuler-rootfs.img
-dd if=output/openeuler-rootfs.img of=/dev/sdX bs=1M status=progress
+zstd -d output/openEuler-24.03-LTS-SP3-rootfs.img.zst -o output/openEuler-24.03-LTS-SP3-rootfs.img
+dd if=output/openEuler-24.03-LTS-SP3-rootfs.img of=/dev/sdX bs=1M status=progress
 ```
 
 ## 默认配置

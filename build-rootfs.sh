@@ -276,13 +276,57 @@ EOF
     log "压缩包创建完成: ${ROOTFS_TARBALL}"
 }
 
+create_all_tarball() {
+    log_section "创建 tar.gz 完整包（含 img.zst）"
+
+    # 确保 img.zst 存在
+    if [ ! -f "${ROOTFS_IMG}" ]; then
+        log "创建 img.zst..."
+        local rootfs_size
+        rootfs_size=$(du -sm "${ROOTFS_DIR}" | cut -f1)
+        local img_size=$((rootfs_size + 5120))
+
+        TEMP_IMG=$(mktemp /tmp/rootfs-XXXXXX.img)
+        TEMP_MOUNT_DIR=$(mktemp -d /tmp/rootfs-mount-XXXX)
+
+        dd if=/dev/zero of="${TEMP_IMG}" bs=1M count="${img_size}" status=none
+        mkfs.ext4 -F "${TEMP_IMG}" >/dev/null
+
+        mount -o loop "${TEMP_IMG}" "${TEMP_MOUNT_DIR}"
+        cp -a "${ROOTFS_DIR}/." "${TEMP_MOUNT_DIR}/"
+        sync
+
+        umount "${TEMP_MOUNT_DIR}"
+        rmdir "${TEMP_MOUNT_DIR}"
+
+        zstd -f "${TEMP_IMG}" -o "${ROOTFS_IMG}"
+        rm -f "${TEMP_IMG}"
+        chmod 644 "${ROOTFS_IMG}"
+    fi
+
+    # 创建完整包（包含 img.zst）
+    local ALL_TARBALL="${WORKSPACE}/${DISTRO}-rootfs-all.tar.gz"
+
+    # 复制 img.zst 到 rootfs 目录
+    cp "${ROOTFS_IMG}" "${ROOTFS_DIR}/"
+
+    tar -czf "${ALL_TARBALL}" -C "${ROOTFS_DIR}" .
+
+    # 删除临时复制的 img.zst
+    rm -f "${ROOTFS_DIR}/${DISTRO}-rootfs.img.zst"
+
+    chmod 644 "${ALL_TARBALL}"
+    log "完整包创建完成: ${ALL_TARBALL}"
+}
+
 show_summary() {
     log_section "构建完成！"
     log "发行版: ${DISTRO_NAME} ${DISTRO_VERSION} (${PROFILE})"
     log "镜像:   ${ROOTFS_IMG}"
     log "压缩包: ${ROOTFS_TARBALL}"
+    log "完整包: ${WORKSPACE}/${DISTRO}-rootfs-all.tar.gz"
     echo ""
-    du -sh "${ROOTFS_IMG}" "${ROOTFS_TARBALL}"
+    du -sh "${ROOTFS_IMG}" "${ROOTFS_TARBALL}" "${WORKSPACE}/${DISTRO}-rootfs-all.tar.gz"
     echo "========================================="
 }
 
@@ -317,6 +361,7 @@ main() {
     cleanup_rootfs
     create_image
     create_tarball
+    create_all_tarball
     show_summary
 }
 

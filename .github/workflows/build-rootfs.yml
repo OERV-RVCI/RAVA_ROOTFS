@@ -39,10 +39,13 @@ jobs:
       run: docker buildx create --use --name insecure-builder --buildkitd-flags '--allow-insecure-entitlement security.insecure'
 
     - name: Build Docker image for ${{ matrix.distro.name }}
-      run: docker buildx build --load -f ${{ matrix.distro.dockerfile }} -t rootfs-builder-${{ matrix.distro.name }} .
+      run: |
+        tag_name=$(echo "${{ matrix.distro.name }}" | sed 's/.*/\L&/')
+        docker buildx build --load -f ${{ matrix.distro.dockerfile }} -t rootfs-builder-${tag_name} .
 
     - name: Build ${{ matrix.distro.name }} rootfs
       run: |
+        tag_name=$(echo "${{ matrix.distro.name }}" | sed 's/.*/\L&/')
         mkdir -p output
         docker run --rm --privileged \
           -v $(pwd)/output:/output \
@@ -50,7 +53,7 @@ jobs:
           -v /dev/pts:/dev/pts \
           -v /sys:/sys \
           -v /proc:/proc \
-          rootfs-builder-${{ matrix.distro.name }} \
+          rootfs-builder-${tag_name} \
           bash /workspace/build-rootfs.sh ${{ matrix.distro.name }}
 
     - name: Display build artifacts
@@ -70,6 +73,13 @@ jobs:
       with:
         name: ${{ matrix.distro.name }}-rootfs.tar.gz
         path: output/*.tar.gz
+        retention-days: 30
+
+    - name: Upload all.tar.gz artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.distro.name }}-rootfs-all.tar.gz
+        path: output/*-all.tar.gz
         retention-days: 30
 
   release:
@@ -138,12 +148,15 @@ jobs:
           ${{ steps.changes.outputs.commits }}
 
           ## 下载
-          - `openeuler-rootfs.img.zst` - openEuler 24.03 SP3 RISC-V64 (RVA20) zstd 压缩镜像
-          - `openeuler-rootfs.tar.gz` - openEuler 24.03 SP3 RISC-V64 (RVA20) tar.gz 压缩包
-          - `openeuler-sp2-rootfs.img.zst` - openEuler 24.03 SP2 RISC-V64 (RVA20) zstd 压缩镜像
-          - `openeuler-sp2-rootfs.tar.gz` - openEuler 24.03 SP2 RISC-V64 (RVA20) tar.gz 压缩包
+          - `openEuler-24.03-LTS-SP3-rootfs.img.zst` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20) zstd 压缩镜像
+          - `openEuler-24.03-LTS-SP3-rootfs.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20) tar.gz 压缩包
+          - `openEuler-24.03-LTS-SP3-rootfs-all.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20) 完整包
+          - `openEuler-24.03-LTS-SP2-rootfs.img.zst` - openEuler 24.03 LTS SP2 RISC-V64 (RVA20) zstd 压缩镜像
+          - `openEuler-24.03-LTS-SP2-rootfs.tar.gz` - openEuler 24.03 LTS SP2 RISC-V64 (RVA20) tar.gz 压缩包
+          - `openEuler-24.03-LTS-SP2-rootfs-all.tar.gz` - openEuler 24.03 LTS SP2 RISC-V64 (RVA20) 完整包
           - `openruyi-rootfs.img.zst` - openRuyi RISC-V64 (RVA23) zstd 压缩镜像
           - `openruyi-rootfs.tar.gz` - openRuyi RISC-V64 (RVA23) tar.gz 压缩包
+          - `openruyi-rootfs-all.tar.gz` - openRuyi RISC-V64 (RVA23) 完整包
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -166,11 +179,14 @@ jobs:
           ${{ steps.changes.outputs.commits }}
 
           ## 下载
-          - `openeuler-rootfs.img.zst` - openEuler 24.03 SP3 RISC-V64 (RVA20) zstd 压缩镜像
-          - `openeuler-rootfs.tar.gz` - openEuler 24.03 SP3 RISC-V64 (RVA20) tar.gz 压缩包
-          - `openeuler-sp2-rootfs.img.zst` - openEuler 24.03 SP2 RISC-V64 (RVA20) zstd 压缩镜像
-          - `openeuler-sp2-rootfs.tar.gz` - openEuler 24.03 SP2 RISC-V64 (RVA20) tar.gz 压缩包
+          - `openEuler-24.03-LTS-SP3-rootfs.img.zst` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20) zstd 压缩镜像
+          - `openEuler-24.03-LTS-SP3-rootfs.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20) tar.gz 压缩包
+          - `openEuler-24.03-LTS-SP3-rootfs-all.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20) 完整包
+          - `openEuler-24.03-LTS-SP2-rootfs.img.zst` - openEuler 24.03 LTS SP2 RISC-V64 (RVA20) zstd 压缩镜像
+          - `openEuler-24.03-LTS-SP2-rootfs.tar.gz` - openEuler 24.03 LTS SP2 RISC-V64 (RVA20) tar.gz 压缩包
+          - `openEuler-24.03-LTS-SP2-rootfs-all.tar.gz` - openEuler 24.03 LTS SP2 RISC-V64 (RVA20) 完整包
           - `openruyi-rootfs.img.zst` - openRuyi RISC-V64 (RVA23) zstd 压缩镜像
           - `openruyi-rootfs.tar.gz` - openRuyi RISC-V64 (RVA23) tar.gz 压缩包
+          - `openruyi-rootfs-all.tar.gz` - openRuyi RISC-V64 (RVA23) 完整包
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
