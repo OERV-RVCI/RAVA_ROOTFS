@@ -121,12 +121,15 @@ install_packages() {
 
     log "安装软件包..."
     if [ "${INSTALL_MODE}" = "group" ]; then
+        local group_opts="--exclude=kernel* --exclude=NetworkManager-config-server"
+        if [ -n "${REPO_URL:-}" ]; then
+            group_opts="${group_opts} --setopt=repo_baseurl=${REPO_URL}"
+        fi
         dnf group install -y \
             --installroot="${ROOTFS_DIR}" \
             --forcearch="${ARCH}" \
             --nodocs \
-            --exclude=kernel* \
-            --exclude=NetworkManager-config-server \
+            ${group_opts} \
             "${INSTALL_TARGET}"
     else
         dnf install -y \
@@ -141,11 +144,15 @@ install_packages() {
     # 安装额外软件包
     if [ -n "${EXTRA_PACKAGES:-}" ]; then
         log "安装额外软件包: ${EXTRA_PACKAGES}"
+        local dnf_opts="${DNF_OPTS:-}"
+        if [ -n "${REPO_URL:-}" ]; then
+            dnf_opts="${dnf_opts} --setopt=repo_baseurl=${REPO_URL}"
+        fi
         dnf install -y \
             --installroot="${ROOTFS_DIR}" \
             --forcearch="${ARCH}" \
             --nodocs \
-            ${DNF_OPTS:-} \
+            ${dnf_opts} \
             ${EXTRA_PACKAGES}
 
         # 仅 openruyi 需要替换 libudev-zero 为 systemd-udev
