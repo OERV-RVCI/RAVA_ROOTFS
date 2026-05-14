@@ -19,7 +19,7 @@ jobs:
           - name: openEuler-24.03-LTS-SP3
             dockerfile: Dockerfile
           - name: openEuler-24.03-LTS-SP2
-            dockerfile: Dockerfile
+            dockerfile: Dockerfile.openEuler-24.03-LTS-SP2
           - name: openruyi
             dockerfile: Dockerfile.openruyi
 
@@ -41,7 +41,7 @@ jobs:
     - name: Build Docker image for ${{ matrix.distro.name }}
       run: |
         tag_name=$(echo "${{ matrix.distro.name }}" | sed 's/.*/\L&/')
-        docker buildx build --load -f ${{ matrix.distro.dockerfile }} -t rootfs-builder-${tag_name} .
+        docker buildx build --load -f ${{ matrix.distro.dockerfile }} -t rootfs-builder-${tag_name} --build-arg DISTRO_VERSION=${{ matrix.distro.name }} .
 
     - name: Build ${{ matrix.distro.name }} rootfs
       run: |

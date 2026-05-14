@@ -1,6 +1,7 @@
-FROM openeuler/openeuler:24.03-lts-sp2
+FROM openeuler/openeuler:24.03-lts-sp3
 
 # 安装 rootfs 构建工具
+ARG DISTRO_VERSION=24.03-lts-sp3
 RUN dnf makecache \
     && dnf install -y \
         dnf \
