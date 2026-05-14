@@ -123,7 +123,7 @@ install_packages() {
     if [ "${INSTALL_MODE}" = "group" ]; then
         local group_opts="--exclude=kernel* --exclude=NetworkManager-config-server"
         if [ -n "${REPO_URL:-}" ]; then
-            group_opts="${group_opts} --disablerepo=* --enablerepo=OS --setopt=OS.baseurl=${REPO_URL}"
+            group_opts="${group_opts} --disablerepo=* --enablerepo=OS --setopt=OS.baseurl=${REPO_URL} --setopt=OS.gpgcheck=0"
         fi
         dnf group install -y \
             --installroot="${ROOTFS_DIR}" \
