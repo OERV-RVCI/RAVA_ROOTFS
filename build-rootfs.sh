@@ -144,9 +144,12 @@ install_packages() {
     # 安装额外软件包
     if [ -n "${EXTRA_PACKAGES:-}" ]; then
         log "安装额外软件包: ${EXTRA_PACKAGES}"
-        local dnf_opts="${DNF_OPTS:-}"
+        local dnf_opts=""
+        if [ -n "${DNF_OPTS:-}" ]; then
+            dnf_opts="${DNF_OPTS}"
+        fi
         if [ -n "${REPO_URL:-}" ]; then
-            dnf_opts="${dnf_opts} --setopt=repo_baseurl=${REPO_URL}"
+            dnf_opts="${dnf_opts} --disablerepo=* --enablerepo=OS --setopt=OS.baseurl=${REPO_URL} --setopt=OS.gpgcheck=0"
         fi
         dnf install -y \
             --installroot="${ROOTFS_DIR}" \

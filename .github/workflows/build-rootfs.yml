@@ -20,8 +20,10 @@ jobs:
             dockerfile: Dockerfile.openEuler-24.03-LTS-SP3
           - name: openEuler-24.03-LTS-SP2
             dockerfile: Dockerfile.openEuler-24.03-LTS-SP2
-          - name: openruyi
-            dockerfile: Dockerfile.openruyi
+          - name: openruyi-rva23
+            dockerfile: Dockerfile.openruyi-rva23
+          - name: openruyi-rva20
+            dockerfile: Dockerfile.openruyi-rva20
 
     steps:
     - uses: actions/checkout@v4
