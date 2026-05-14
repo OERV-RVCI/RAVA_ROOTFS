@@ -2,23 +2,35 @@
 #
 # 发行版配置
 # 用法: source config.sh <distro>
-# 支持的发行版: openeuler, openruyi
+# 支持的发行版: openEuler-24.03-LTS-SP3, openEuler-24.03-LTS-SP2, openruyi
 #
 
 set -euo pipefail
 
-DISTRO="${1:-openeuler}"
+DISTRO="${1:-openEuler-24.03-LTS-SP3}"
 
 case "${DISTRO}" in
-    openeuler)
+    openEuler-24.03-LTS-SP3)
         DISTRO_NAME="openEuler"
-        DISTRO_VERSION="24.03-lts-sp2"
+        DISTRO_VERSION="24.03-LTS-SP3"
         ARCH="riscv64"
         PROFILE="rva20"
-        CONTAINER_IMAGE="openeuler/openeuler:${DISTRO_VERSION}"
-        REPO_BASE="https://repo.openeuler.org"
-        REPO_URL="${REPO_BASE}/openEuler-${DISTRO_VERSION}/OS/${ARCH}/"
-        PACKAGE_MANAGER="dnf"
+        HOSTNAME="openeuler-riscv64"
+        ROOT_PASSWORD="openEuler12#\$"
+        NTP_SERVERS="ntp.aliyun.com ntp.tencent.com"
+        FALLBACK_NTP="0.pool.ntp.org 1.pool.ntp.org"
+        PROXY_HTTP="http://10.200.1.1:8888"
+        PROXY_HTTPS="http://10.200.1.1:8888"
+        PROXY_SOCKS="socks5://10.200.1.1:8585"
+        INSTALL_MODE="group"
+        INSTALL_TARGET="Minimal Install"
+        EXTRA_PACKAGES="systemd-timesyncd"
+        ;;
+    openEuler-24.03-LTS-SP2)
+        DISTRO_NAME="openEuler"
+        DISTRO_VERSION="24.03-LTS-SP2"
+        ARCH="riscv64"
+        PROFILE="rva20"
         HOSTNAME="openeuler-riscv64"
         ROOT_PASSWORD="openEuler12#\$"
         NTP_SERVERS="ntp.aliyun.com ntp.tencent.com"
@@ -36,10 +48,6 @@ case "${DISTRO}" in
         ARCH="riscv64"
         PROFILE="rva23"
         DISPLAY_DISTRO_VERSION="RVA23"
-        CONTAINER_IMAGE="git.openruyi.cn/openruyi/creek-x86-64:latest"
-        REPO_BASE="https://boat.openruyi.cn"
-        REPO_URL="${REPO_BASE}/unstable/rva23"
-        PACKAGE_MANAGER="dnf"
         HOSTNAME="openeuler-riscv64"
         ROOT_PASSWORD="openEuler12#\$"
         NTP_SERVERS="ntp.aliyun.com ntp.tencent.com"
@@ -54,13 +62,12 @@ case "${DISTRO}" in
         ;;
     *)
         echo "错误: 不支持的发行版 '${DISTRO}'"
-        echo "支持的发行版: openeuler, openruyi"
+        echo "支持的发行版: openEuler-24.03-LTS-SP3, openEuler-24.03-LTS-SP2, openruyi"
         exit 1
         ;;
 esac
 
 # 导出配置
-export DISTRO DISTRO_NAME DISTRO_VERSION ARCH PROFILE CONTAINER_IMAGE
-export REPO_BASE REPO_URL PACKAGE_MANAGER HOSTNAME ROOT_PASSWORD
+export DISTRO DISTRO_NAME DISTRO_VERSION ARCH PROFILE
 export NTP_SERVERS FALLBACK_NTP PROXY_HTTP PROXY_HTTPS PROXY_SOCKS
 export INSTALL_MODE INSTALL_TARGET DNF_OPTS EXTRA_PACKAGES
