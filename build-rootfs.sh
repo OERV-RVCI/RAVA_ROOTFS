@@ -158,8 +158,8 @@ install_packages() {
             ${dnf_opts} \
             ${EXTRA_PACKAGES}
 
-        # 仅 openruyi 需要替换 libudev-zero 为 systemd-udev
-        if [ "${DISTRO}" = "openruyi" ]; then
+        # 仅 openruyi 相关发行版需要替换 libudev-zero 为 systemd-udev
+        if [[ "${DISTRO}" == openruyi* ]]; then
             log "替换 libudev-zero 为 systemd-udev..."
             dnf swap -y \
                 --installroot="${ROOTFS_DIR}" \
