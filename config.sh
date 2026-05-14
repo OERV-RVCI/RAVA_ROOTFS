@@ -41,6 +41,7 @@ case "${DISTRO}" in
         PROXY_SOCKS="socks5://10.200.1.1:8585"
         INSTALL_MODE="group"
         INSTALL_TARGET="Minimal Install"
+        REPO_URL="https://fast-mirror.isrc.ac.cn/openeuler/openEuler-24.03-LTS-SP2/everything/riscv64/"
         EXTRA_PACKAGES="systemd-timesyncd"
         ;;
     openruyi-rva23)
