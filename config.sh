@@ -24,7 +24,7 @@ case "${DISTRO}" in
         PROXY_SOCKS="socks5://10.200.1.1:8585"
         INSTALL_MODE="group"
         INSTALL_TARGET="Minimal Install"
-        DNF_OPTS="--repo openEuler-24.03-LTS-SP3"
+        DNF_OPTS="--use-host-config --repo openEuler-24.03-LTS-SP3"
         EXTRA_PACKAGES="systemd-timesyncd"
         ;;
     openEuler-24.03-LTS-SP2)
@@ -41,7 +41,7 @@ case "${DISTRO}" in
         PROXY_SOCKS="socks5://10.200.1.1:8585"
         INSTALL_MODE="group"
         INSTALL_TARGET="Minimal Install"
-        DNF_OPTS="--repo openEuler-24.03-LTS-SP2"
+        DNF_OPTS="--use-host-config --repo openEuler-24.03-LTS-SP2"
         EXTRA_PACKAGES="systemd-timesyncd"
         ;;
     openruyi-rva23)
@@ -59,7 +59,7 @@ case "${DISTRO}" in
         PROXY_SOCKS="socks5://10.200.1.1:8585"
         INSTALL_MODE="package"
         INSTALL_TARGET="openruyi-minimal"
-        DNF_OPTS="--repo 'openruyi-rva23'"
+        DNF_OPTS="--use-host-config --repo openruyi-rva23"
         EXTRA_PACKAGES="systemd-timesyncd systemd libseccomp NetworkManager"
         ;;
     openruyi-rva20)
@@ -77,7 +77,7 @@ case "${DISTRO}" in
         PROXY_SOCKS="socks5://10.200.1.1:8585"
         INSTALL_MODE="package"
         INSTALL_TARGET="openruyi-minimal"
-        DNF_OPTS="--repo 'openruyi-rva20'"
+        DNF_OPTS="--use-host-config --repo openruyi-rva20"
         EXTRA_PACKAGES="systemd-timesyncd systemd libseccomp NetworkManager"
         ;;
     *)

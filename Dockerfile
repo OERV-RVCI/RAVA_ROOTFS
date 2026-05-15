@@ -12,40 +12,19 @@ RUN dnf install -y \
     && dnf clean all
 
 # 配置 openEuler-24.03-LTS-SP3 软件源
-RUN cat > /etc/yum.repos.d/openEuler-24.03-LTS-SP3.repo << 'EOF'
-[openEuler-24.03-LTS-SP3]
-name=openEuler 24.03 LTS SP3
-baseurl=https://fast-mirror.isrc.ac.cn/openeuler/openEuler-24.03-LTS-SP3/everything/riscv64/
-enabled=1
-gpgcheck=0
-EOF
+RUN printf '[openEuler-24.03-LTS-SP3]\nname=openEuler 24.03 LTS SP3\nbaseurl=https://fast-mirror.isrc.ac.cn/openeuler/openEuler-24.03-LTS-SP3/everything/riscv64/\nenabled=1\ngpgcheck=0\n' > /etc/yum.repos.d/openEuler-24.03-LTS-SP3.repo
 
 # 配置 openEuler-24.03-LTS-SP2 软件源
-RUN cat > /etc/yum.repos.d/openEuler-24.03-LTS-SP2.repo << 'EOF'
-[openEuler-24.03-LTS-SP2]
-name=openEuler 24.03 LTS SP2
-baseurl=https://fast-mirror.isrc.ac.cn/openeuler/openEuler-24.03-LTS-SP2/everything/riscv64/
-enabled=1
-gpgcheck=0
-EOF
+RUN printf '[openEuler-24.03-LTS-SP2]\nname=openEuler 24.03 LTS SP2\nbaseurl=https://fast-mirror.isrc.ac.cn/openeuler/openEuler-24.03-LTS-SP2/everything/riscv64/\nenabled=1\ngpgcheck=0\n' > /etc/yum.repos.d/openEuler-24.03-LTS-SP2.repo
 
 # 配置 openRuyi RVA23 软件源
-RUN cat > /etc/yum.repos.d/openruyi-rva23.repo << 'EOF'
-[openruyi-rva23]
-name=openRuyi RVA23
-baseurl=https://boat.openruyi.cn/unstable/rva23
-enabled=1
-gpgcheck=0
-EOF
+RUN printf '[openruyi-rva23]\nname=openRuyi RVA23\nbaseurl=https://boat.openruyi.cn/unstable/rva23\nenabled=1\ngpgcheck=0\n' > /etc/yum.repos.d/openruyi-rva23.repo
 
 # 配置 openRuyi RVA20 软件源
-RUN cat > /etc/yum.repos.d/openruyi-rva20.repo << 'EOF'
-[openruyi-rva20]
-name=openRuyi RVA20
-baseurl=https://boat.openruyi.cn/unstable/rva20
-enabled=1
-gpgcheck=0
-EOF
+RUN printf '[openruyi-rva20]\nname=openRuyi RVA20\nbaseurl=https://boat.openruyi.cn/unstable/rva20\nenabled=1\ngpgcheck=0\n' > /etc/yum.repos.d/openruyi-rva20.repo
+
+# 刷新仓库缓存
+RUN dnf makecache
 
 COPY config.sh /workspace/
 COPY build-rootfs.sh /workspace/
