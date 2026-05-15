@@ -126,15 +126,12 @@ jobs:
           commits=$(git log --oneline "$prev_tag"..HEAD 2>/dev/null || echo "")
         fi
 
-        # Output using heredoc to file, then cat
-        heredoc_file=$(mktemp)
-        cat > "$heredoc_file" << EOF
-$commits
-EOF
-        echo "commits<<EOF" >> $GITHUB_OUTPUT
-        cat "$heredoc_file" >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
-        rm -f "$heredoc_file"
+        # Output commits using printf to handle newlines
+        {
+          printf 'commits<<EOF\n'
+          printf '%s\n' "$commits"
+          printf 'EOF\n'
+        } >> $GITHUB_OUTPUT
 
     - name: Create Timestamped Release
       uses: softprops/action-gh-release@v2
