@@ -173,6 +173,11 @@ EOF
 
     echo "${HOSTNAME}" > "${ROOTFS_DIR}/etc/hostname"
 
+    # openEuler 需要 autorelabel
+    if [[ "${DISTRO}" == openEuler* ]]; then
+        touch "${ROOTFS_DIR}/.autorelabel"
+    fi
+
     mkdir -p "${ROOTFS_DIR}/etc/ssh"
     {
         echo "PasswordAuthentication yes"
