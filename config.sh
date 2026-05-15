@@ -25,7 +25,7 @@ case "${DISTRO}" in
         INSTALL_MODE="group"
         INSTALL_TARGET="minimal-environment"
         DNF_OPTS="--use-host-config --repo openEuler-24.03-LTS-SP3"
-        EXTRA_PACKAGES="systemd-timesyncd"
+        EXTRA_PACKAGES="systemd-timesyncd selinux-policy-targeted"
         ;;
     openEuler-24.03-LTS-SP2)
         DISTRO_NAME="openEuler"
@@ -42,7 +42,7 @@ case "${DISTRO}" in
         INSTALL_MODE="group"
         INSTALL_TARGET="minimal-environment"
         DNF_OPTS="--use-host-config --repo openEuler-24.03-LTS-SP2"
-        EXTRA_PACKAGES="systemd-timesyncd"
+        EXTRA_PACKAGES="systemd-timesyncd selinux-policy-targeted"
         ;;
     openruyi-rva23)
         DISTRO_NAME="openRuyi"
