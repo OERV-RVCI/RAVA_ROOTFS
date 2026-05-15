@@ -2,7 +2,7 @@
 #
 # 发行版配置
 # 用法: source config.sh <distro>
-# 支持的发行版: openEuler-24.03-LTS-SP3, openEuler-24.03-LTS-SP2, openruyi
+# 支持的发行版: openEuler-24.03-LTS-SP3, openEuler-24.03-LTS-SP2, openruyi-rva23, openruyi-rva20
 #
 
 set -euo pipefail
@@ -24,7 +24,7 @@ case "${DISTRO}" in
         PROXY_SOCKS="socks5://10.200.1.1:8585"
         INSTALL_MODE="group"
         INSTALL_TARGET="Minimal Install"
-        REPO_URL="https://fast-mirror.isrc.ac.cn/openeuler/openEuler-24.03-LTS-SP3/everything/riscv64/rva20/riscv64/"
+        DNF_OPTS="--repo openEuler-24.03-LTS-SP3"
         EXTRA_PACKAGES="systemd-timesyncd"
         ;;
     openEuler-24.03-LTS-SP2)
@@ -41,7 +41,7 @@ case "${DISTRO}" in
         PROXY_SOCKS="socks5://10.200.1.1:8585"
         INSTALL_MODE="group"
         INSTALL_TARGET="Minimal Install"
-        REPO_URL="https://fast-mirror.isrc.ac.cn/openeuler/openEuler-24.03-LTS-SP2/everything/riscv64/"
+        DNF_OPTS="--repo openEuler-24.03-LTS-SP2"
         EXTRA_PACKAGES="systemd-timesyncd"
         ;;
     openruyi-rva23)
@@ -59,7 +59,7 @@ case "${DISTRO}" in
         PROXY_SOCKS="socks5://10.200.1.1:8585"
         INSTALL_MODE="package"
         INSTALL_TARGET="openruyi-minimal"
-        DNF_OPTS="--use-host-config"
+        DNF_OPTS="--repo 'openruyi-rva23'"
         EXTRA_PACKAGES="systemd-timesyncd systemd libseccomp NetworkManager"
         ;;
     openruyi-rva20)
@@ -77,7 +77,7 @@ case "${DISTRO}" in
         PROXY_SOCKS="socks5://10.200.1.1:8585"
         INSTALL_MODE="package"
         INSTALL_TARGET="openruyi-minimal"
-        DNF_OPTS="--use-host-config"
+        DNF_OPTS="--repo 'openruyi-rva20'"
         EXTRA_PACKAGES="systemd-timesyncd systemd libseccomp NetworkManager"
         ;;
     *)
@@ -88,7 +88,7 @@ case "${DISTRO}" in
 esac
 
 # 导出配置
-export DISTRO DISTRO_NAME DISTRO_VERSION ARCH PROFILE DISPLAY_DISTRO_VERSION REPO_URL
+export DISTRO DISTRO_NAME DISTRO_VERSION ARCH PROFILE DISPLAY_DISTRO_VERSION
 export NTP_SERVERS FALLBACK_NTP PROXY_HTTP PROXY_HTTPS PROXY_SOCKS
 export INSTALL_MODE INSTALL_TARGET DNF_OPTS EXTRA_PACKAGES
 export HOSTNAME ROOT_PASSWORD
