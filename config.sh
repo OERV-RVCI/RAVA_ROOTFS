@@ -23,7 +23,7 @@ case "${DISTRO}" in
         PROXY_HTTPS="http://10.200.1.1:8888"
         PROXY_SOCKS="socks5://10.200.1.1:8585"
         INSTALL_MODE="group"
-        INSTALL_TARGET="Minimal Install"
+        INSTALL_TARGET="minimal-environment"
         DNF_OPTS="--use-host-config --repo openEuler-24.03-LTS-SP3"
         EXTRA_PACKAGES="systemd-timesyncd"
         ;;
@@ -40,7 +40,7 @@ case "${DISTRO}" in
         PROXY_HTTPS="http://10.200.1.1:8888"
         PROXY_SOCKS="socks5://10.200.1.1:8585"
         INSTALL_MODE="group"
-        INSTALL_TARGET="Minimal Install"
+        INSTALL_TARGET="minimal-environment"
         DNF_OPTS="--use-host-config --repo openEuler-24.03-LTS-SP2"
         EXTRA_PACKAGES="systemd-timesyncd"
         ;;

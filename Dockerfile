@@ -12,7 +12,7 @@ RUN dnf install -y \
     && dnf clean all
 
 # 配置 openEuler-24.03-LTS-SP3 软件源
-RUN printf '[openEuler-24.03-LTS-SP3]\nname=openEuler 24.03 LTS SP3\nbaseurl=https://fast-mirror.isrc.ac.cn/openeuler/openEuler-24.03-LTS-SP3/everything/riscv64/\nenabled=1\ngpgcheck=0\n' > /etc/yum.repos.d/openEuler-24.03-LTS-SP3.repo
+RUN printf '[openEuler-24.03-LTS-SP3]\nname=openEuler 24.03 LTS SP3\nbaseurl=https://fast-mirror.isrc.ac.cn/openeuler/openEuler-24.03-LTS-SP3/everything/riscv64/rva20/riscv64/\nenabled=1\ngpgcheck=0\n' > /etc/yum.repos.d/openEuler-24.03-LTS-SP3.repo
 
 # 配置 openEuler-24.03-LTS-SP2 软件源
 RUN printf '[openEuler-24.03-LTS-SP2]\nname=openEuler 24.03 LTS SP2\nbaseurl=https://fast-mirror.isrc.ac.cn/openeuler/openEuler-24.03-LTS-SP2/everything/riscv64/\nenabled=1\ngpgcheck=0\n' > /etc/yum.repos.d/openEuler-24.03-LTS-SP2.repo
