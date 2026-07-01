@@ -8,8 +8,14 @@
 #   本地模式: sudo bash build-rootfs.sh [distro]
 #
 # 发行版参数:
-#   openeuler  - openEuler 24.03 SP2 RISC-V64 (RVA20) (默认)
-#   openruyi   - openRuyi RISC-V64 (RVA23)
+#   openEuler-24.03-LTS-SP3-RVA20          - openEuler 24.03 LTS SP3 RISC-V64 (RVA20, SELinux 关闭)
+#   openEuler-24.03-LTS-SP3-RVA20-selinux  - openEuler 24.03 LTS SP3 RISC-V64 (RVA20, SELinux 开启)
+#   openEuler-24.03-LTS-SP3-RVA23          - openEuler 24.03 LTS SP3 RISC-V64 (RVA23, SELinux 关闭)
+#   openEuler-24.03-LTS-SP3-RVA23-selinux  - openEuler 24.03 LTS SP3 RISC-V64 (RVA23, SELinux 开启)
+#   openEuler-24.03-LTS-SP2          - openEuler 24.03 LTS SP2 RISC-V64 (RVA20, SELinux 关闭)
+#   openEuler-24.03-LTS-SP2-selinux  - openEuler 24.03 LTS SP2 RISC-V64 (RVA20, SELinux 开启)
+#   openruyi-rva23                    - openRuyi RISC-V64 (RVA23)
+#   openruyi-rva20                    - openRuyi RISC-V64 (RVA20)
 #
 
 set -euo pipefail
@@ -179,8 +185,8 @@ EOF
 
     echo "${HOSTNAME}" > "${ROOTFS_DIR}/etc/hostname"
 
-    # openEuler 需要 autorelabel
-    if [[ "${DISTRO}" == openEuler* ]]; then
+    # SELinux 启用时需要 autorelabel
+    if [[ "${SELINUX_ENABLED:-false}" == "true" ]]; then
         touch "${ROOTFS_DIR}/.autorelabel"
     fi
 

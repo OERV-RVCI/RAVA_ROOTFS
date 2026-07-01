@@ -2,7 +2,7 @@
 #
 # 发行版配置
 # 用法: source config.sh <distro>
-# 支持的发行版: openEuler-24.03-LTS-SP3, openEuler-24.03-LTS-SP2, openruyi-rva23, openruyi-rva20
+# 支持的发行版: openEuler-24.03-LTS-SP3, openEuler-24.03-LTS-SP3-selinux, openEuler-24.03-LTS-SP2, openEuler-24.03-LTS-SP2-selinux, openruyi-rva23, openruyi-rva20
 #
 
 set -euo pipefail
@@ -10,7 +10,7 @@ set -euo pipefail
 DISTRO="${1:-openruyi-rva23}"
 
 case "${DISTRO}" in
-    openEuler-24.03-LTS-SP3)
+    openEuler-24.03-LTS-SP3-RVA20)
         DISTRO_NAME="openEuler"
         DISTRO_VERSION="24.03-LTS-SP3"
         ARCH="riscv64"
@@ -24,8 +24,63 @@ case "${DISTRO}" in
         PROXY_SOCKS="socks5://10.200.1.1:8585"
         INSTALL_MODE="group"
         INSTALL_TARGET="minimal-environment"
-        DNF_OPTS="--use-host-config --repo openEuler-24.03-LTS-SP3"
+        DNF_OPTS="--use-host-config --repo openEuler-24.03-LTS-SP3-RVA20"
+        EXTRA_PACKAGES="systemd-timesyncd"
+        SELINUX_ENABLED=false
+        ;;
+    openEuler-24.03-LTS-SP3-RVA20-selinux)
+        DISTRO_NAME="openEuler"
+        DISTRO_VERSION="24.03-LTS-SP3"
+        ARCH="riscv64"
+        PROFILE="rva20"
+        HOSTNAME="riscv64"
+        ROOT_PASSWORD="openEuler12#\$"
+        NTP_SERVERS="ntp.aliyun.com ntp.tencent.com"
+        FALLBACK_NTP="0.pool.ntp.org 1.pool.ntp.org"
+        PROXY_HTTP="http://10.200.1.1:8888"
+        PROXY_HTTPS="http://10.200.1.1:8888"
+        PROXY_SOCKS="socks5://10.200.1.1:8585"
+        INSTALL_MODE="group"
+        INSTALL_TARGET="minimal-environment"
+        DNF_OPTS="--use-host-config --repo openEuler-24.03-LTS-SP3-RVA20"
         EXTRA_PACKAGES="systemd-timesyncd selinux-policy-targeted policycoreutils"
+        SELINUX_ENABLED=true
+        ;;
+    openEuler-24.03-LTS-SP3-RVA23)
+        DISTRO_NAME="openEuler"
+        DISTRO_VERSION="24.03-LTS-SP3"
+        ARCH="riscv64"
+        PROFILE="rva23"
+        HOSTNAME="riscv64"
+        ROOT_PASSWORD="openEuler12#\$"
+        NTP_SERVERS="ntp.aliyun.com ntp.tencent.com"
+        FALLBACK_NTP="0.pool.ntp.org 1.pool.ntp.org"
+        PROXY_HTTP="http://10.200.1.1:8888"
+        PROXY_HTTPS="http://10.200.1.1:8888"
+        PROXY_SOCKS="socks5://10.200.1.1:8585"
+        INSTALL_MODE="group"
+        INSTALL_TARGET="minimal-environment"
+        DNF_OPTS="--use-host-config --repo openEuler-24.03-LTS-SP3-RVA23"
+        EXTRA_PACKAGES="systemd-timesyncd"
+        SELINUX_ENABLED=false
+        ;;
+    openEuler-24.03-LTS-SP3-RVA23-selinux)
+        DISTRO_NAME="openEuler"
+        DISTRO_VERSION="24.03-LTS-SP3"
+        ARCH="riscv64"
+        PROFILE="rva23"
+        HOSTNAME="riscv64"
+        ROOT_PASSWORD="openEuler12#\$"
+        NTP_SERVERS="ntp.aliyun.com ntp.tencent.com"
+        FALLBACK_NTP="0.pool.ntp.org 1.pool.ntp.org"
+        PROXY_HTTP="http://10.200.1.1:8888"
+        PROXY_HTTPS="http://10.200.1.1:8888"
+        PROXY_SOCKS="socks5://10.200.1.1:8585"
+        INSTALL_MODE="group"
+        INSTALL_TARGET="minimal-environment"
+        DNF_OPTS="--use-host-config --repo openEuler-24.03-LTS-SP3-RVA23"
+        EXTRA_PACKAGES="systemd-timesyncd selinux-policy-targeted policycoreutils"
+        SELINUX_ENABLED=true
         ;;
     openEuler-24.03-LTS-SP2)
         DISTRO_NAME="openEuler"
@@ -42,7 +97,26 @@ case "${DISTRO}" in
         INSTALL_MODE="group"
         INSTALL_TARGET="minimal-environment"
         DNF_OPTS="--use-host-config --repo openEuler-24.03-LTS-SP2"
+        EXTRA_PACKAGES="systemd-timesyncd"
+        SELINUX_ENABLED=false
+        ;;
+    openEuler-24.03-LTS-SP2-selinux)
+        DISTRO_NAME="openEuler"
+        DISTRO_VERSION="24.03-LTS-SP2"
+        ARCH="riscv64"
+        PROFILE="rva20"
+        HOSTNAME="riscv64"
+        ROOT_PASSWORD="openEuler12#\$"
+        NTP_SERVERS="ntp.aliyun.com ntp.tencent.com"
+        FALLBACK_NTP="0.pool.ntp.org 1.pool.ntp.org"
+        PROXY_HTTP="http://10.200.1.1:8888"
+        PROXY_HTTPS="http://10.200.1.1:8888"
+        PROXY_SOCKS="socks5://10.200.1.1:8585"
+        INSTALL_MODE="group"
+        INSTALL_TARGET="minimal-environment"
+        DNF_OPTS="--use-host-config --repo openEuler-24.03-LTS-SP2"
         EXTRA_PACKAGES="systemd-timesyncd selinux-policy-targeted policycoreutils"
+        SELINUX_ENABLED=true
         ;;
     openruyi-rva23)
         DISTRO_NAME="openRuyi"
@@ -82,7 +156,7 @@ case "${DISTRO}" in
         ;;
     *)
         echo "错误: 不支持的发行版 '${DISTRO}'"
-        echo "支持的发行版: openEuler-24.03-LTS-SP3, openEuler-24.03-LTS-SP2, openruyi-rva23, openruyi-rva20"
+        echo "支持的发行版: openEuler-24.03-LTS-SP3, openEuler-24.03-LTS-SP3-selinux, openEuler-24.03-LTS-SP2, openEuler-24.03-LTS-SP2-selinux, openruyi-rva23, openruyi-rva20"
         exit 1
         ;;
 esac
@@ -90,5 +164,5 @@ esac
 # 导出配置
 export DISTRO DISTRO_NAME DISTRO_VERSION ARCH PROFILE DISPLAY_DISTRO_VERSION
 export NTP_SERVERS FALLBACK_NTP PROXY_HTTP PROXY_HTTPS PROXY_SOCKS
-export INSTALL_MODE INSTALL_TARGET DNF_OPTS EXTRA_PACKAGES
+export INSTALL_MODE INSTALL_TARGET DNF_OPTS EXTRA_PACKAGES SELINUX_ENABLED
 export HOSTNAME ROOT_PASSWORD

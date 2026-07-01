@@ -16,9 +16,17 @@ jobs:
     strategy:
       matrix:
         distro:
-          - name: openEuler-24.03-LTS-SP3
-            repo: openEuler-24.03-LTS-SP3
+          - name: openEuler-24.03-LTS-SP3-RVA20
+            repo: openEuler-24.03-LTS-SP3-RVA20
+          - name: openEuler-24.03-LTS-SP3-RVA20-selinux
+            repo: openEuler-24.03-LTS-SP3-RVA20
+          - name: openEuler-24.03-LTS-SP3-RVA23
+            repo: openEuler-24.03-LTS-SP3-RVA23
+          - name: openEuler-24.03-LTS-SP3-RVA23-selinux
+            repo: openEuler-24.03-LTS-SP3-RVA23
           - name: openEuler-24.03-LTS-SP2
+            repo: openEuler-24.03-LTS-SP2
+          - name: openEuler-24.03-LTS-SP2-selinux
             repo: openEuler-24.03-LTS-SP2
           - name: openruyi-rva23
             repo: openruyi-rva23
@@ -150,12 +158,24 @@ jobs:
           ${{ steps.changes.outputs.commits }}
 
           ## 下载
-          - `openEuler-24.03-LTS-SP3-rootfs.img.zst` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20) zstd 压缩镜像
-          - `openEuler-24.03-LTS-SP3-rootfs.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20) tar.gz 压缩包
-          - `openEuler-24.03-LTS-SP3-rootfs-all.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20) 完整包
+          - `openEuler-24.03-LTS-SP3-RVA20-rootfs.img.zst` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20) zstd 压缩镜像
+          - `openEuler-24.03-LTS-SP3-RVA20-rootfs.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20) tar.gz 压缩包
+          - `openEuler-24.03-LTS-SP3-RVA20-rootfs-all.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20) 完整包
+          - `openEuler-24.03-LTS-SP3-RVA20-selinux-rootfs.img.zst` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20, SELinux) zstd 压缩镜像
+          - `openEuler-24.03-LTS-SP3-RVA20-selinux-rootfs.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20, SELinux) tar.gz 压缩包
+          - `openEuler-24.03-LTS-SP3-RVA20-selinux-rootfs-all.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20, SELinux) 完整包
+          - `openEuler-24.03-LTS-SP3-RVA23-rootfs.img.zst` - openEuler 24.03 LTS SP3 RISC-V64 (RVA23) zstd 压缩镜像
+          - `openEuler-24.03-LTS-SP3-RVA23-rootfs.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA23) tar.gz 压缩包
+          - `openEuler-24.03-LTS-SP3-RVA23-rootfs-all.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA23) 完整包
+          - `openEuler-24.03-LTS-SP3-RVA23-selinux-rootfs.img.zst` - openEuler 24.03 LTS SP3 RISC-V64 (RVA23, SELinux) zstd 压缩镜像
+          - `openEuler-24.03-LTS-SP3-RVA23-selinux-rootfs.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA23, SELinux) tar.gz 压缩包
+          - `openEuler-24.03-LTS-SP3-RVA23-selinux-rootfs-all.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA23, SELinux) 完整包
           - `openEuler-24.03-LTS-SP2-rootfs.img.zst` - openEuler 24.03 LTS SP2 RISC-V64 (RVA20) zstd 压缩镜像
           - `openEuler-24.03-LTS-SP2-rootfs.tar.gz` - openEuler 24.03 LTS SP2 RISC-V64 (RVA20) tar.gz 压缩包
           - `openEuler-24.03-LTS-SP2-rootfs-all.tar.gz` - openEuler 24.03 LTS SP2 RISC-V64 (RVA20) 完整包
+          - `openEuler-24.03-LTS-SP2-selinux-rootfs.img.zst` - openEuler 24.03 LTS SP2 RISC-V64 (RVA20, SELinux) zstd 压缩镜像
+          - `openEuler-24.03-LTS-SP2-selinux-rootfs.tar.gz` - openEuler 24.03 LTS SP2 RISC-V64 (RVA20, SELinux) tar.gz 压缩包
+          - `openEuler-24.03-LTS-SP2-selinux-rootfs-all.tar.gz` - openEuler 24.03 LTS SP2 RISC-V64 (RVA20, SELinux) 完整包
           - `openruyi-rva23-rootfs.img.zst` - openRuyi RISC-V64 (RVA23) zstd 压缩镜像
           - `openruyi-rva23-rootfs.tar.gz` - openRuyi RISC-V64 (RVA23) tar.gz 压缩包
           - `openruyi-rva23-rootfs-all.tar.gz` - openRuyi RISC-V64 (RVA23) 完整包
@@ -184,12 +204,24 @@ jobs:
           ${{ steps.changes.outputs.commits }}
 
           ## 下载
-          - `openEuler-24.03-LTS-SP3-rootfs.img.zst` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20) zstd 压缩镜像
-          - `openEuler-24.03-LTS-SP3-rootfs.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20) tar.gz 压缩包
-          - `openEuler-24.03-LTS-SP3-rootfs-all.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20) 完整包
+          - `openEuler-24.03-LTS-SP3-RVA20-rootfs.img.zst` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20) zstd 压缩镜像
+          - `openEuler-24.03-LTS-SP3-RVA20-rootfs.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20) tar.gz 压缩包
+          - `openEuler-24.03-LTS-SP3-RVA20-rootfs-all.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20) 完整包
+          - `openEuler-24.03-LTS-SP3-RVA20-selinux-rootfs.img.zst` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20, SELinux) zstd 压缩镜像
+          - `openEuler-24.03-LTS-SP3-RVA20-selinux-rootfs.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20, SELinux) tar.gz 压缩包
+          - `openEuler-24.03-LTS-SP3-RVA20-selinux-rootfs-all.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA20, SELinux) 完整包
+          - `openEuler-24.03-LTS-SP3-RVA23-rootfs.img.zst` - openEuler 24.03 LTS SP3 RISC-V64 (RVA23) zstd 压缩镜像
+          - `openEuler-24.03-LTS-SP3-RVA23-rootfs.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA23) tar.gz 压缩包
+          - `openEuler-24.03-LTS-SP3-RVA23-rootfs-all.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA23) 完整包
+          - `openEuler-24.03-LTS-SP3-RVA23-selinux-rootfs.img.zst` - openEuler 24.03 LTS SP3 RISC-V64 (RVA23, SELinux) zstd 压缩镜像
+          - `openEuler-24.03-LTS-SP3-RVA23-selinux-rootfs.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA23, SELinux) tar.gz 压缩包
+          - `openEuler-24.03-LTS-SP3-RVA23-selinux-rootfs-all.tar.gz` - openEuler 24.03 LTS SP3 RISC-V64 (RVA23, SELinux) 完整包
           - `openEuler-24.03-LTS-SP2-rootfs.img.zst` - openEuler 24.03 LTS SP2 RISC-V64 (RVA20) zstd 压缩镜像
           - `openEuler-24.03-LTS-SP2-rootfs.tar.gz` - openEuler 24.03 LTS SP2 RISC-V64 (RVA20) tar.gz 压缩包
           - `openEuler-24.03-LTS-SP2-rootfs-all.tar.gz` - openEuler 24.03 LTS SP2 RISC-V64 (RVA20) 完整包
+          - `openEuler-24.03-LTS-SP2-selinux-rootfs.img.zst` - openEuler 24.03 LTS SP2 RISC-V64 (RVA20, SELinux) zstd 压缩镜像
+          - `openEuler-24.03-LTS-SP2-selinux-rootfs.tar.gz` - openEuler 24.03 LTS SP2 RISC-V64 (RVA20, SELinux) tar.gz 压缩包
+          - `openEuler-24.03-LTS-SP2-selinux-rootfs-all.tar.gz` - openEuler 24.03 LTS SP2 RISC-V64 (RVA20, SELinux) 完整包
           - `openruyi-rva23-rootfs.img.zst` - openRuyi RISC-V64 (RVA23) zstd 压缩镜像
           - `openruyi-rva23-rootfs.tar.gz` - openRuyi RISC-V64 (RVA23) tar.gz 压缩包
           - `openruyi-rva23-rootfs-all.tar.gz` - openRuyi RISC-V64 (RVA23) 完整包
