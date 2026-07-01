@@ -170,6 +170,8 @@ install_packages() {
     if [[ "${DISTRO}" == openEuler* ]]; then
         log "替换 openEuler 仓库地址为 fast-mirror.isrc.ac.cn..."
         find "${ROOTFS_DIR}/etc/yum.repos.d" -name "*.repo" -exec sed -i 's|repo\.openeuler\.org|fast-mirror.isrc.ac.cn/openeuler|g' {} \;
+        log "注释掉 metalink 配置..."
+        find "${ROOTFS_DIR}/etc/yum.repos.d" -name "*.repo" -exec sed -i 's|^metalink=|#metalink=|g' {} \;
     fi
 
     log "软件包安装完成"
