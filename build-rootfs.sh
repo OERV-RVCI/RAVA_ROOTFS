@@ -297,7 +297,7 @@ EOF
 create_all_tarball() {
     log_section "创建 tar.gz 完整包（含 img.zst）"
 
-    # 确保 img.zst 存在
+    # 确保 img.zst 和 tar.gz 存在
     if [ ! -f "${ROOTFS_IMG}" ]; then
         log "创建 img.zst..."
         local rootfs_size
@@ -322,16 +322,21 @@ create_all_tarball() {
         chmod 644 "${ROOTFS_IMG}"
     fi
 
-    # 创建完整包（包含 img.zst）
+    if [ ! -f "${ROOTFS_TARBALL}" ]; then
+        log "创建 tar.gz..."
+        tar -czf "${ROOTFS_TARBALL}" -C "${ROOTFS_DIR}" .
+        chmod 644 "${ROOTFS_TARBALL}"
+    fi
+
+    # 创建完整包（只包含 img.zst 和 tar.gz）
     local ALL_TARBALL="${WORKSPACE}/${DISTRO}-rootfs-all.tar.gz"
+    local TEMP_ALL_DIR=$(mktemp -d /tmp/rootfs-all-XXXX)
 
-    # 复制 img.zst 到 rootfs 目录
-    cp "${ROOTFS_IMG}" "${ROOTFS_DIR}/"
+    cp "${ROOTFS_IMG}" "${TEMP_ALL_DIR}/"
+    cp "${ROOTFS_TARBALL}" "${TEMP_ALL_DIR}/"
 
-    tar -czf "${ALL_TARBALL}" -C "${ROOTFS_DIR}" .
-
-    # 删除临时复制的 img.zst
-    rm -f "${ROOTFS_DIR}/${DISTRO}-rootfs.img.zst"
+    tar -czf "${ALL_TARBALL}" -C "${TEMP_ALL_DIR}" .
+    rm -rf "${TEMP_ALL_DIR}"
 
     chmod 644 "${ALL_TARBALL}"
     log "完整包创建完成: ${ALL_TARBALL}"
