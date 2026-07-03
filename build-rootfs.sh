@@ -200,8 +200,8 @@ EOF
 
 echo "root:${ROOT_PASSWORD}" | chroot "${ROOTFS_DIR}" chpasswd
 
-    # openruyi 需要创建 systemd-resolve 用户
-    if [ "${DISTRO}" = "openruyi" ]; then
+    # openruyi 需要创建 systemd-resolve 用户并启动 NetworkManager
+    if [[ "${DISTRO}" == openruyi* ]]; then
         chroot "${ROOTFS_DIR}" useradd -r -s /sbin/nologin systemd-resolve 2>/dev/null || true
         chroot "${ROOTFS_DIR}" systemctl enable NetworkManager.service 2>/dev/null || true
     fi
