@@ -204,6 +204,9 @@ echo "root:${ROOT_PASSWORD}" | chroot "${ROOTFS_DIR}" chpasswd
     if [[ "${DISTRO}" == openruyi* ]]; then
         chroot "${ROOTFS_DIR}" useradd -r -s /sbin/nologin systemd-resolve 2>/dev/null || true
         chroot "${ROOTFS_DIR}" systemctl enable NetworkManager.service 2>/dev/null || true
+        cat > "${ROOTFS_DIR}/etc/resolv.conf" << 'EOF'
+nameserver 223.5.5.5
+EOF
     fi
 
     # chroot "${ROOTFS_DIR}" systemctl enable sshd.service 2>/dev/null || true
