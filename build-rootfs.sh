@@ -174,6 +174,12 @@ install_packages() {
         find "${ROOTFS_DIR}/etc/yum.repos.d" -name "*.repo" -exec sed -i 's|^metalink=|#metalink=|g' {} \;
     fi
 
+    # 仅 openruyi-rva20 需要替换仓库地址为 unstable
+    if [[ "${DISTRO}" == "openruyi-rva20" ]]; then
+        log "替换 openruyi-rva20 仓库地址为 unstable..."
+        find "${ROOTFS_DIR}/etc/yum.repos.d" -name "*.repo" -exec sed -i 's|boat\.openruyi\.cn/stable|boat.openruyi.cn/unstable|g' {} \;
+    fi
+
     log "软件包安装完成"
 }
 

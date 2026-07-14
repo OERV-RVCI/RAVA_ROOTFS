@@ -8,6 +8,8 @@ on:
     branches:
       - main
       - master
+    tags:
+      - 'latest'
   workflow_dispatch:
 
 jobs:
